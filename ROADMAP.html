@@ -1,0 +1,2018 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>ROADMAP</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="/dev/fd/11" />
+</head>
+<body>
+<h1 id="flingoos-desktop-service---implementation-roadmap">Flingoos
+Desktop Service - Implementation Roadmap</h1>
+<p><strong>Session-based desktop UI for triggering data collection,
+processing, and workflow display</strong></p>
+<blockquote>
+<p><strong>Integrates with existing Flingoos Bridge installer,
+auto-updater, and distribution system</strong> <strong>Follows
+established phase-based development methodology</strong>
+<strong>Leverages existing JWT + GCP + Firebase Auth security
+architecture</strong></p>
+</blockquote>
+<h2 id="system-architecture-data-flow">System Architecture &amp; Data
+Flow</h2>
+<pre class="mermaid"><code>graph TD
+    subgraph &quot;Multi-Tenant Desktop Service Architecture&quot;
+      
+        UI[Desktop UI] 
+        DS[Desktop Service - on-premise]
+      
+        subgraph &quot;Session Recording - Existing Bridge&quot;
+            BA[Bridge API - on-premise]
+            Bridge[Flingoos Bridge Session Manager]
+            GCP[(GCP Storage - cloud)]
+        end
+      
+        subgraph &quot;Processing Pipeline - Local Forge CLI&quot;
+            FA[Backend Worker - cloud run]
+            Forge[Forge CLI Tool - local execution]
+            FS[(Firestore - cloud)]
+        end
+      
+        subgraph &quot;Authentication - Existing&quot;
+            Auth[JWT + Firebase Auth + GCP Signed URLs]
+        end
+    end
+  
+    %% Data Flow with Step Labels
+    UI --&gt;|&quot;A. Start Recording&quot;| DS
+    DS --&gt;|&quot;B. POST /session/start&quot;| BA
+    BA --&gt;|&quot;C. Enable collectors&quot;| Bridge
+    Bridge --&gt;|&quot;D. Collect &amp; upload data&quot;| GCP
+  
+    UI --&gt;|&quot;E. Stop Recording&quot;| DS
+    DS --&gt;|&quot;F.1 POST /session/stop&quot;| BA
+        DS --&gt;|&quot;F.2 POST /sessions/{id}/process&quot;| FA
+    
+    BA --&gt;|&quot;G. Disable collectors&quot;| Bridge
+    FA --&gt;|&quot;H. Execute forge CLI&quot;| Forge
+    Forge --&gt;|&quot;I. Download session data&quot;| GCP
+    Forge --&gt;|&quot;J. Process &amp; upload workflow&quot;| FS
+  
+    DS --&gt;|&quot;K. Poll workflow status&quot;| FA
+    FA --&gt;|&quot;L. Check Firestore&quot;| FS
+    DS --&gt;|&quot;M. Fetch completed workflow&quot;| FS
+    DS --&gt;|&quot;N. Display results&quot;| UI
+  
+    %% Security connections
+    DS -.-&gt;|&quot;JWT Tokens&quot;| Auth
+    BA -.-&gt;|&quot;JWT Validation&quot;| Auth
+    FA -.-&gt;|&quot;JWT Validation&quot;| Auth</code></pre>
+<h2 id="implementation-strategy">Implementation Strategy</h2>
+<p><strong>Development Diary Methodology</strong>: Following established
+phase-based approach with numbered entries, standard format
+(Decision/Challenge, Context, Resolution, Impact, Follow-up)</p>
+<p><strong>Distribution Integration</strong>: Desktop service integrated
+into existing Inno Setup installer, PyInstaller build system, and
+auto-updater architecture</p>
+<p><strong>Security Continuity</strong>: Leverages existing JWT + GCP
+Signed URLs + Firebase Auth without modification</p>
+<hr />
+<h2 id="critical-integration-desktop-service-distribution">⚠️ Critical
+Integration: Desktop Service Distribution</h2>
+<p><strong>ISSUE IDENTIFIED</strong>: Desktop service must integrate
+with existing sophisticated installer/updater system rather than being a
+separate application.</p>
+<h3 id="current-flingoos-bridge-distribution-system">Current Flingoos
+Bridge Distribution System:</h3>
+<ul>
+<li><strong>Inno Setup Installer</strong> (<code>installer.iss</code>):
+Windows installer with admin privileges, user configuration,
+auto-start</li>
+<li><strong>PyInstaller Build</strong>
+(<code>flingoos-bridge.spec</code>): Windows executable with all
+dependencies bundled</li>
+<li><strong>Go Auto-Updater</strong> (<code>updater/main.go</code>):
+Secure auto-update with signature verification, UAC elevation</li>
+<li><strong>Build Automation</strong>
+(<code>scripts/build-installer.ps1</code>): Complete build pipeline with
+testing, signing, distribution</li>
+<li><strong>Code Signing</strong>: Self-signed certificates for
+development, production signing pipeline</li>
+</ul>
+<h3 id="desktop-service-integration-strategy">Desktop Service
+Integration Strategy:</h3>
+<ol type="1">
+<li><strong>Desktop Service as Bridge Component</strong>: Integrate
+desktop service into existing bridge codebase as
+<code>bridge.ui.desktop</code> module</li>
+<li><strong>Shared Installer</strong>: Extend <code>installer.iss</code>
+to include desktop service UI components and dependencies</li>
+<li><strong>Unified Auto-Update</strong>: Desktop service updates with
+bridge via existing updater system</li>
+<li><strong>Consistent Versioning</strong>: Desktop service version
+matches bridge version in <code>config.toml</code></li>
+<li><strong>Single Installation</strong>: Users install one application
+with both bridge and desktop service capabilities</li>
+</ol>
+<h3 id="updated-installation-flow">Updated Installation Flow:</h3>
+<pre><code>User runs flingoos-bridge-installer.exe
+    ↓
+Installs: bridge.exe + desktop-service (web UI) + updater.exe
+    ↓  
+User launches bridge.exe --desktop-mode
+    ↓
+Bridge starts with desktop UI server + existing bridge functionality</code></pre>
+<p><strong>This resolves</strong>: Version management, distribution
+complexity, user confusion, and maintenance overhead.</p>
+<hr />
+<h2 id="implementation-overview">Implementation Overview</h2>
+<p><strong>Following established development diary methodology with
+numbered entries and standard format</strong></p>
+<table>
+<colgroup>
+<col style="width: 12%" />
+<col style="width: 26%" />
+<col style="width: 21%" />
+<col style="width: 38%" />
+</colgroup>
+<thead>
+<tr>
+<th>Phase</th>
+<th>Repository</th>
+<th>Focus Area</th>
+<th>Key Deliverables</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Phase 1</strong></td>
+<td><code>flingoos-bridge</code></td>
+<td>Session API Integration</td>
+<td>REST API, Session Management, Database Schema</td>
+</tr>
+<tr>
+<td><strong>Phase 2</strong></td>
+<td><code>flingoos-bridge-backend-service</code></td>
+<td>Forge Processing Integration</td>
+<td>Session Processing, Job Tracking, Status API</td>
+</tr>
+<tr>
+<td><strong>Phase 3</strong></td>
+<td><code>flingoos-bridge</code></td>
+<td>Desktop UI Integration</td>
+<td>Web UI, Service Orchestration, Authentication</td>
+</tr>
+<tr>
+<td><strong>Phase 4</strong></td>
+<td><code>flingoos-bridge</code></td>
+<td>Installer &amp; Distribution</td>
+<td>PyInstaller, Inno Setup, Auto-Updater Integration</td>
+</tr>
+<tr>
+<td><strong>Phase 5</strong></td>
+<td>All repositories</td>
+<td>Testing &amp; Deployment</td>
+<td>E2E Testing, Security Validation, Production Deploy</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Multi-tenant, enterprise-grade security</strong> |
+<strong>Seamless integration with existing systems</strong></p>
+<hr />
+<h2 id="critical-architecture-update-forge-cli-integration">⚠️
+<strong>Critical Architecture Update: Forge CLI
+Integration</strong></h2>
+<p><strong>Issue Discovered</strong>: Initial analysis incorrectly
+described Forge as a web service with REST endpoints.</p>
+<p><strong>Corrected Understanding</strong>: <strong>Flingoos-Forge is a
+local CLI tool</strong> that: - Downloads raw data from GCS buckets
+(where Bridge uploads session data) - Processes data locally through
+stages A-F (segmentation, annotation, transcription, LLM analysis) -
+Uploads processed workflows directly to Firestore using service account
+credentials</p>
+<p><strong>Updated Integration Approach</strong>: 1. Backend service
+receives <code>POST /sessions/{id}/process</code> request 2. Backend
+spawns local <code>forge analyze</code> command with session
+parameters<br />
+3. Forge CLI downloads data from GCS, processes locally, uploads to
+Firestore 4. Desktop service polls backend for completion status 5.
+Desktop service fetches completed workflow from Firestore</p>
+<p><strong>Authentication</strong>: Forge uses GCS service account
+credentials (not JWT tokens) and Firestore service account for
+uploads.</p>
+<h2
+id="critical-architecture-update-simplified-credentialization-model">⚠️
+<strong>Critical Architecture Update: Simplified Credentialization
+Model</strong></h2>
+<p><strong>Issue Discovered</strong>: Initial analysis incorrectly
+described Forge as a web service and overcomplicated device
+authorization.</p>
+<p><strong>Corrected Understanding</strong>: 1. <strong>Flingoos-Forge
+is a local CLI tool</strong> (not a web service) 2. <strong>Device
+Authorization</strong>: Current device only - user analyzes their own
+device data 3. <strong>Device Identity</strong>: Use exact same
+mechanism as Bridge for consistency</p>
+<p><strong>Updated Integration Approach</strong>: 1. Desktop UI
+auto-detects device_id using Bridge’s
+<code>DeviceIdentity.get_device_id()</code> 2. Backend receives session
+request with user JWT (device_id implicit from request context) 3.
+Backend spawns <code>forge analyze</code> command with user’s device
+only 4. Forge processes user’s device data and uploads to Firestore with
+user context 5. Desktop service retrieves user’s workflows from
+Firestore</p>
+<p><strong>Authentication</strong>: Multi-level credentialization: -
+<strong>User Level</strong>: Firebase Auth JWT for UI → Backend requests
+- <strong>Device Level</strong>: Automatic device_id from Bridge’s
+hardware fingerprinting - <strong>Service Level</strong>: Backend uses
+service account credentials for Forge → GCS/Firestore - <strong>Data
+Isolation</strong>: User can only analyze own device data</p>
+<hr />
+<h2 id="device-identity-integration">🔐 <strong>Device Identity
+Integration</strong></h2>
+<h3
+id="bridge-device-identity-mechanism-from-bridgedeviceidentity.py"><strong>Bridge
+Device Identity Mechanism</strong> (from
+<code>bridge/device/identity.py</code>)</h3>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> bridge.device <span class="im">import</span> DeviceIdentity</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Exact same method as Bridge uses:</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>device_id <span class="op">=</span> DeviceIdentity.get_device_id()</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Returns: &quot;{hostname}-{hardware_fingerprint}&quot;</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Example: &quot;johns-macbook-pro-abc12345&quot;</span></span></code></pre></div>
+<p><strong>Hardware Fingerprinting Components:</strong> -
+<strong>Windows</strong>: Machine GUID from registry -
+<strong>macOS</strong>: Hardware serial number via ioreg -
+<strong>Linux</strong>: /etc/machine-id -
+<strong>Cross-platform</strong>: hostname, platform, OS user -
+<strong>Result</strong>: Persistent device_id that survives app
+reinstalls</p>
+<h3 id="desktop-service-device-resolution"><strong>Desktop Service
+Device Resolution</strong></h3>
+<p>Desktop Service will use <strong>identical device identity
+logic</strong> as Bridge:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># File: bridge/ui/desktop/device_resolver.py</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> bridge.device <span class="im">import</span> DeviceIdentity</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> DesktopDeviceResolver:</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">@staticmethod</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> get_current_device_id() <span class="op">-&gt;</span> <span class="bu">str</span>:</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>        <span class="co">&quot;&quot;&quot;Get current device ID using Bridge&#39;s method.&quot;&quot;&quot;</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> DeviceIdentity.get_device_id()</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">@staticmethod</span>  </span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> get_device_identity() <span class="op">-&gt;</span> Dict[<span class="bu">str</span>, Any]:</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>        <span class="co">&quot;&quot;&quot;Get full device identity with metadata.&quot;&quot;&quot;</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> DeviceIdentity.get_full_identity()</span></code></pre></div>
+<hr />
+<h2 id="comprehensive-credentialization-testing-strategy">🧪
+<strong>Comprehensive Credentialization Testing Strategy</strong></h2>
+<h3 id="device-identity-testing"><strong>Device Identity
+Testing</strong></h3>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># File: tests/integration/test_device_identity_integration.py</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> TestDeviceIdentityIntegration:</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> test_desktop_service_uses_bridge_device_identity(<span class="va">self</span>):</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>        <span class="co">&quot;&quot;&quot;Verify desktop service gets same device_id as Bridge.&quot;&quot;&quot;</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>        bridge_device_id <span class="op">=</span> DeviceIdentity.get_device_id()</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>        desktop_device_id <span class="op">=</span> DesktopDeviceResolver.get_current_device_id()</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">assert</span> bridge_device_id <span class="op">==</span> desktop_device_id</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> test_device_identity_persistence(<span class="va">self</span>):</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>        <span class="co">&quot;&quot;&quot;Verify device_id is consistent across sessions.&quot;&quot;&quot;</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>        device_id_1 <span class="op">=</span> DeviceIdentity.get_device_id()</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Clear cache</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>        DeviceIdentity._cached_identity <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>        device_id_2 <span class="op">=</span> DeviceIdentity.get_device_id()</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>        <span class="cf">assert</span> device_id_1 <span class="op">==</span> device_id_2</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> test_hardware_fingerprint_uniqueness(<span class="va">self</span>):</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>        <span class="co">&quot;&quot;&quot;Verify hardware fingerprinting produces unique IDs.&quot;&quot;&quot;</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>        device_id <span class="op">=</span> DeviceIdentity.get_device_id()</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>        identity <span class="op">=</span> DeviceIdentity.get_full_identity()</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>        <span class="cf">assert</span> <span class="bu">len</span>(device_id) <span class="op">&gt;</span> <span class="dv">0</span></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>        <span class="cf">assert</span> <span class="st">&quot;-&quot;</span> <span class="kw">in</span> device_id  <span class="co"># hostname-fingerprint format</span></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>        <span class="cf">assert</span> identity[<span class="st">&quot;hardware_fingerprint&quot;</span>] <span class="kw">in</span> device_id</span></code></pre></div>
+<h3 id="user-authorization-testing"><strong>User Authorization
+Testing</strong></h3>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># File: tests/integration/test_user_authorization.py</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> TestUserDeviceAuthorization:</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> test_user_can_only_analyze_own_device(<span class="va">self</span>):</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>        <span class="co">&quot;&quot;&quot;User can only request analysis of their current device.&quot;&quot;&quot;</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>        user_jwt <span class="op">=</span> create_test_jwt(<span class="st">&quot;john@diligent4.com&quot;</span>, <span class="st">&quot;diligent4&quot;</span>)</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>        current_device <span class="op">=</span> DeviceIdentity.get_device_id()</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Valid: same device</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>        response <span class="op">=</span> client.post(<span class="st">&quot;/api/v1/sessions/process&quot;</span>, </span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>            headers<span class="op">=</span>{<span class="st">&quot;Authorization&quot;</span>: <span class="ss">f&quot;Bearer </span><span class="sc">{</span>user_jwt<span class="sc">}</span><span class="ss">&quot;</span>},</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>            json<span class="op">=</span>{<span class="st">&quot;start_time&quot;</span>: <span class="st">&quot;2024-01-15T09:00:00Z&quot;</span>, <span class="st">&quot;end_time&quot;</span>: <span class="st">&quot;2024-01-15T17:00:00Z&quot;</span>})</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">assert</span> response.status_code <span class="op">==</span> <span class="dv">200</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Invalid: attempting different device (should be impossible in real flow)</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>        <span class="co"># This test ensures backend rejects any tampering attempts</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> test_cross_org_data_isolation(<span class="va">self</span>):</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>        <span class="co">&quot;&quot;&quot;Users cannot access data from other organizations.&quot;&quot;&quot;</span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>        user_org1 <span class="op">=</span> create_test_jwt(<span class="st">&quot;alice@org1.com&quot;</span>, <span class="st">&quot;org1&quot;</span>)</span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>        user_org2 <span class="op">=</span> create_test_jwt(<span class="st">&quot;bob@org2.com&quot;</span>, <span class="st">&quot;org2&quot;</span>)</span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Each user can only see their own org&#39;s data</span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>        response1 <span class="op">=</span> client.get(<span class="ss">f&quot;/api/v1/sessions/</span><span class="sc">{</span>session_id<span class="sc">}</span><span class="ss">/workflow&quot;</span>,</span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>                              headers<span class="op">=</span>{<span class="st">&quot;Authorization&quot;</span>: <span class="ss">f&quot;Bearer </span><span class="sc">{</span>user_org1<span class="sc">}</span><span class="ss">&quot;</span>})</span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>        response2 <span class="op">=</span> client.get(<span class="ss">f&quot;/api/v1/sessions/</span><span class="sc">{</span>session_id<span class="sc">}</span><span class="ss">/workflow&quot;</span>, </span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>                              headers<span class="op">=</span>{<span class="st">&quot;Authorization&quot;</span>: <span class="ss">f&quot;Bearer </span><span class="sc">{</span>user_org2<span class="sc">}</span><span class="ss">&quot;</span>})</span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Only org1 user should succeed if session belongs to org1</span></span></code></pre></div>
+<h3 id="end-to-end-credentialization-flow-testing"><strong>End-to-End
+Credentialization Flow Testing</strong></h3>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># File: tests/integration/test_e2e_credentialization.py  </span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> TestE2ECredentializationFlow:</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> test_complete_user_session_workflow(<span class="va">self</span>):</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>        <span class="co">&quot;&quot;&quot;Test complete flow: User → Bridge → Forge → Firestore → User.&quot;&quot;&quot;</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 1. User logs in and gets JWT</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>        user_jwt <span class="op">=</span> firebase_auth.login(<span class="st">&quot;john@diligent4.com&quot;</span>)</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>        device_id <span class="op">=</span> DeviceIdentity.get_device_id()</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 2. Start session on Bridge</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>        bridge_response <span class="op">=</span> bridge_client.start_session(</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>            device_id<span class="op">=</span>device_id,</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>            collectors<span class="op">=</span>[<span class="st">&quot;mouse&quot;</span>, <span class="st">&quot;window&quot;</span>],</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>            auth_token<span class="op">=</span>user_jwt</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>        session_id <span class="op">=</span> bridge_response[<span class="st">&quot;session_id&quot;</span>]</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 3. Stop session and trigger processing</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>        bridge_client.stop_session(session_id, auth_token<span class="op">=</span>user_jwt)</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>        backend_response <span class="op">=</span> backend_client.process_session(</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>            session_id<span class="op">=</span>session_id,</span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>            start_time<span class="op">=</span><span class="st">&quot;2024-01-15T09:00:00Z&quot;</span>,</span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>            end_time<span class="op">=</span><span class="st">&quot;2024-01-15T17:00:00Z&quot;</span>,</span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>            auth_token<span class="op">=</span>user_jwt</span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 4. Wait for Forge processing to complete</span></span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.wait_for_processing_completion(session_id, user_jwt)</span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 5. Verify user can retrieve their workflow</span></span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a>        workflow_response <span class="op">=</span> backend_client.get_workflow(</span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a>            session_id<span class="op">=</span>session_id,</span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a>            auth_token<span class="op">=</span>user_jwt</span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a>        <span class="cf">assert</span> workflow_response[<span class="st">&quot;org_id&quot;</span>] <span class="op">==</span> <span class="st">&quot;diligent4&quot;</span></span>
+<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a>        <span class="cf">assert</span> workflow_response[<span class="st">&quot;device_id&quot;</span>] <span class="op">==</span> device_id</span>
+<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a>        <span class="cf">assert</span> workflow_response[<span class="st">&quot;analyzed_by_user&quot;</span>] <span class="op">==</span> <span class="st">&quot;john@diligent4.com&quot;</span></span>
+<span id="cb7-39"><a href="#cb7-39" aria-hidden="true" tabindex="-1"></a>        <span class="cf">assert</span> <span class="st">&quot;workflow_data&quot;</span> <span class="kw">in</span> workflow_response</span>
+<span id="cb7-40"><a href="#cb7-40" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb7-41"><a href="#cb7-41" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> test_forge_cli_integration_with_credentials(<span class="va">self</span>):</span>
+<span id="cb7-42"><a href="#cb7-42" aria-hidden="true" tabindex="-1"></a>        <span class="co">&quot;&quot;&quot;Test that backend correctly calls Forge CLI with right parameters.&quot;&quot;&quot;</span></span>
+<span id="cb7-43"><a href="#cb7-43" aria-hidden="true" tabindex="-1"></a>        user_jwt <span class="op">=</span> create_test_jwt(<span class="st">&quot;alice@diligent4.com&quot;</span>, <span class="st">&quot;diligent4&quot;</span>)</span>
+<span id="cb7-44"><a href="#cb7-44" aria-hidden="true" tabindex="-1"></a>        device_id <span class="op">=</span> <span class="st">&quot;test-device-123&quot;</span></span>
+<span id="cb7-45"><a href="#cb7-45" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb7-46"><a href="#cb7-46" aria-hidden="true" tabindex="-1"></a>        <span class="cf">with</span> patch(<span class="st">&#39;subprocess.run&#39;</span>) <span class="im">as</span> mock_forge:</span>
+<span id="cb7-47"><a href="#cb7-47" aria-hidden="true" tabindex="-1"></a>            backend_client.process_session(</span>
+<span id="cb7-48"><a href="#cb7-48" aria-hidden="true" tabindex="-1"></a>                session_id<span class="op">=</span><span class="st">&quot;test_session&quot;</span>,</span>
+<span id="cb7-49"><a href="#cb7-49" aria-hidden="true" tabindex="-1"></a>                start_time<span class="op">=</span><span class="st">&quot;2024-01-15T09:00:00Z&quot;</span>, </span>
+<span id="cb7-50"><a href="#cb7-50" aria-hidden="true" tabindex="-1"></a>                end_time<span class="op">=</span><span class="st">&quot;2024-01-15T17:00:00Z&quot;</span>,</span>
+<span id="cb7-51"><a href="#cb7-51" aria-hidden="true" tabindex="-1"></a>                auth_token<span class="op">=</span>user_jwt</span>
+<span id="cb7-52"><a href="#cb7-52" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb7-53"><a href="#cb7-53" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb7-54"><a href="#cb7-54" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Verify Forge called with correct parameters</span></span>
+<span id="cb7-55"><a href="#cb7-55" aria-hidden="true" tabindex="-1"></a>            mock_forge.assert_called_with([</span>
+<span id="cb7-56"><a href="#cb7-56" aria-hidden="true" tabindex="-1"></a>                <span class="st">&quot;forge&quot;</span>, <span class="st">&quot;analyze&quot;</span>,</span>
+<span id="cb7-57"><a href="#cb7-57" aria-hidden="true" tabindex="-1"></a>                <span class="st">&quot;--org&quot;</span>, <span class="st">&quot;diligent4&quot;</span>,</span>
+<span id="cb7-58"><a href="#cb7-58" aria-hidden="true" tabindex="-1"></a>                <span class="st">&quot;--device&quot;</span>, device_id,</span>
+<span id="cb7-59"><a href="#cb7-59" aria-hidden="true" tabindex="-1"></a>                <span class="st">&quot;--from&quot;</span>, <span class="st">&quot;2024-01-15T09:00:00Z&quot;</span>,</span>
+<span id="cb7-60"><a href="#cb7-60" aria-hidden="true" tabindex="-1"></a>                <span class="st">&quot;--to&quot;</span>, <span class="st">&quot;2024-01-15T17:00:00Z&quot;</span></span>
+<span id="cb7-61"><a href="#cb7-61" aria-hidden="true" tabindex="-1"></a>            ])</span></code></pre></div>
+<h3 id="security-testing"><strong>Security Testing</strong></h3>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># File: tests/security/test_credentialization_security.py</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> TestCredentializationSecurity:</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> test_jwt_tampering_prevention(<span class="va">self</span>):</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>        <span class="co">&quot;&quot;&quot;Verify system rejects tampered JWT tokens.&quot;&quot;&quot;</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>        valid_jwt <span class="op">=</span> create_test_jwt(<span class="st">&quot;alice@diligent4.com&quot;</span>, <span class="st">&quot;diligent4&quot;</span>)</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>        tampered_jwt <span class="op">=</span> valid_jwt[:<span class="op">-</span><span class="dv">10</span>] <span class="op">+</span> <span class="st">&quot;tampered123&quot;</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>        response <span class="op">=</span> client.post(<span class="st">&quot;/api/v1/sessions/process&quot;</span>,</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>            headers<span class="op">=</span>{<span class="st">&quot;Authorization&quot;</span>: <span class="ss">f&quot;Bearer </span><span class="sc">{</span>tampered_jwt<span class="sc">}</span><span class="ss">&quot;</span>},</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>            json<span class="op">=</span>{<span class="st">&quot;start_time&quot;</span>: <span class="st">&quot;...&quot;</span>, <span class="st">&quot;end_time&quot;</span>: <span class="st">&quot;...&quot;</span>})</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">assert</span> response.status_code <span class="op">==</span> <span class="dv">401</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">assert</span> <span class="st">&quot;invalid token&quot;</span> <span class="kw">in</span> response.json()[<span class="st">&quot;detail&quot;</span>].lower()</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> test_org_isolation_enforcement(<span class="va">self</span>):</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>        <span class="co">&quot;&quot;&quot;Verify strict org-level data isolation.&quot;&quot;&quot;</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Create sessions for different orgs</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>        session_org1 <span class="op">=</span> create_session(<span class="st">&quot;user1@org1.com&quot;</span>, <span class="st">&quot;org1&quot;</span>, <span class="st">&quot;device1&quot;</span>)  </span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>        session_org2 <span class="op">=</span> create_session(<span class="st">&quot;user2@org2.com&quot;</span>, <span class="st">&quot;org2&quot;</span>, <span class="st">&quot;device2&quot;</span>)</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>        <span class="co"># User from org1 tries to access org2 data</span></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>        user_org1_jwt <span class="op">=</span> create_test_jwt(<span class="st">&quot;user1@org1.com&quot;</span>, <span class="st">&quot;org1&quot;</span>)</span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>        response <span class="op">=</span> client.get(<span class="ss">f&quot;/api/v1/sessions/</span><span class="sc">{</span>session_org2<span class="sc">}</span><span class="ss">/workflow&quot;</span>,</span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>                             headers<span class="op">=</span>{<span class="st">&quot;Authorization&quot;</span>: <span class="ss">f&quot;Bearer </span><span class="sc">{</span>user_org1_jwt<span class="sc">}</span><span class="ss">&quot;</span>})</span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>        <span class="cf">assert</span> response.status_code <span class="op">==</span> <span class="dv">403</span></span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>        <span class="cf">assert</span> <span class="st">&quot;access denied&quot;</span> <span class="kw">in</span> response.json()[<span class="st">&quot;detail&quot;</span>].lower()</span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> test_device_spoofing_prevention(<span class="va">self</span>):</span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>        <span class="co">&quot;&quot;&quot;Verify system prevents device ID spoofing attacks.&quot;&quot;&quot;</span></span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>        <span class="co"># This test ensures that even if someone tries to modify device_id</span></span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>        <span class="co"># in requests, the backend uses the actual device making the request</span></span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>        user_jwt <span class="op">=</span> create_test_jwt(<span class="st">&quot;alice@diligent4.com&quot;</span>, <span class="st">&quot;diligent4&quot;</span>)</span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>        real_device <span class="op">=</span> DeviceIdentity.get_device_id()</span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Attempt to specify different device (should be ignored/prevented)</span></span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a>        <span class="cf">with</span> patch(<span class="st">&#39;DeviceIdentity.get_device_id&#39;</span>, return_value<span class="op">=</span>real_device):</span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a>            response <span class="op">=</span> client.post(<span class="st">&quot;/api/v1/sessions/process&quot;</span>,</span>
+<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a>                headers<span class="op">=</span>{<span class="st">&quot;Authorization&quot;</span>: <span class="ss">f&quot;Bearer </span><span class="sc">{</span>user_jwt<span class="sc">}</span><span class="ss">&quot;</span>},</span>
+<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a>                json<span class="op">=</span>{</span>
+<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a>                    <span class="st">&quot;start_time&quot;</span>: <span class="st">&quot;2024-01-15T09:00:00Z&quot;</span>,</span>
+<span id="cb8-42"><a href="#cb8-42" aria-hidden="true" tabindex="-1"></a>                    <span class="st">&quot;end_time&quot;</span>: <span class="st">&quot;2024-01-15T17:00:00Z&quot;</span>,</span>
+<span id="cb8-43"><a href="#cb8-43" aria-hidden="true" tabindex="-1"></a>                    <span class="st">&quot;device_id&quot;</span>: <span class="st">&quot;fake-device-123&quot;</span>  <span class="co"># This should be ignored</span></span>
+<span id="cb8-44"><a href="#cb8-44" aria-hidden="true" tabindex="-1"></a>                })</span>
+<span id="cb8-45"><a href="#cb8-45" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb8-46"><a href="#cb8-46" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Verify backend used real device, not fake one</span></span>
+<span id="cb8-47"><a href="#cb8-47" aria-hidden="true" tabindex="-1"></a>        <span class="cf">assert</span> response.status_code <span class="op">==</span> <span class="dv">200</span></span>
+<span id="cb8-48"><a href="#cb8-48" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Backend should have used real_device, not fake-device-123</span></span></code></pre></div>
+<h1 id="phase-1-bridge-session-api-integration">PHASE 1: Bridge Session
+API Integration</h1>
+<p><strong>Goal</strong>: Extend flingoos-bridge with session-based
+recording API while maintaining existing functionality</p>
+<p><strong>Repository</strong>: <code>flingoos-bridge</code>
+<strong>Dependencies</strong>: Existing TriggerManager, collectors
+architecture</p>
+<h2 id="session-data-model-implementation">1.1: Session Data Model
+Implementation</h2>
+<p><strong>Decision/Challenge:</strong> Implementing session-based data
+model to replace continuous collection with user-controlled recording
+sessions.</p>
+<p><strong>Context:</strong> Current bridge runs collectors
+continuously. New desktop service requires session-based recording where
+users explicitly start/stop data collection for specific time periods.
+Need to track session metadata, collector configuration, and session
+status throughout the lifecycle.</p>
+<p><strong>Resolution:</strong> Create session data model with:</p>
+<ul>
+<li><code>bridge/models/session.py</code> - Session model with UUID,
+timestamps, collector config</li>
+<li>Session states: <code>recording</code> → <code>stopped</code> →
+<code>uploading</code> → <code>complete</code></li>
+<li>Database persistence for session recovery after restarts</li>
+<li>Integration with existing TriggerManager architecture</li>
+</ul>
+<p><strong>Testing:</strong></p>
+<ul>
+<li>Unit tests: Session creation, UUID uniqueness, timestamp validation,
+status transitions</li>
+<li>Integration tests: Session persistence, database recovery,
+cross-restart session continuity</li>
+</ul>
+<p><strong>Impact:</strong> Foundation for all session-based
+functionality. Enables user-controlled recording sessions while
+maintaining existing collector architecture.</p>
+<p><strong>Follow-up:</strong> Next step is SessionManager component to
+control collectors based on session state.</p>
+<h2 id="session-manager-component-implementation">1.2: Session Manager
+Component Implementation</h2>
+<p><strong>Decision/Challenge:</strong> Building SessionManager to
+control collector lifecycle based on session state while maintaining
+existing TriggerManager architecture.</p>
+<p><strong>Context:</strong> Need component to orchestrate collector
+start/stop operations per session, maintain session state, and ensure
+data isolation between concurrent sessions. Must integrate with existing
+TriggerManager without breaking current collector functionality.</p>
+<p><strong>Resolution:</strong> Implement SessionManager with:</p>
+<ul>
+<li><code>bridge/services/session_manager.py</code> - Core session
+control logic</li>
+<li>Session-based collector enable/disable functionality</li>
+<li>Integration with TriggerManager for event coordination</li>
+<li>Multi-session support with data isolation</li>
+</ul>
+<p><strong>Testing:</strong></p>
+<ul>
+<li>Unit tests: Session control logic, collector state management, error
+handling</li>
+<li>Integration tests: Multi-session isolation, TriggerManager
+coordination, concurrent session handling</li>
+</ul>
+<p><strong>Impact:</strong> Enables session-based control of existing
+collector architecture without disrupting current continuous collection
+capability.</p>
+<p><strong>Follow-up:</strong> Next step is database schema for session
+persistence and recovery.</p>
+<h2 id="session-database-schema-implementation">1.3: Session Database
+Schema Implementation</h2>
+<p><strong>Decision/Challenge:</strong> Designing database schema for
+session persistence, recovery, and file tracking while maintaining
+existing database architecture.</p>
+<p><strong>Context:</strong> Sessions must survive application restarts,
+track associated data files, and provide audit trail for session
+lifecycle. Must extend existing SQLite database without breaking current
+storage patterns.</p>
+<p><strong>Resolution:</strong> Extend database with session tables:</p>
+<ul>
+<li><code>bridge/storage/session_db.py</code> - Session database
+operations</li>
+<li>Session metadata table: UUID, timestamps, status, collector
+config</li>
+<li>Session-file mapping table: associate uploaded files with
+sessions</li>
+<li>Database migration for seamless updates</li>
+</ul>
+<p><strong>Testing:</strong></p>
+<ul>
+<li>Unit tests: Schema creation, CRUD operations, constraint validation,
+migration scripts</li>
+<li>Integration tests: Performance under load, data consistency,
+recovery procedures</li>
+</ul>
+<p><strong>Impact:</strong> Provides persistent session tracking and
+enables session recovery after application restarts.</p>
+<p><strong>Follow-up:</strong> Next step is Bridge REST API
+implementation.</p>
+<h2 id="bridge-rest-api-framework-setup">1.4: Bridge REST API Framework
+Setup</h2>
+<ul>
+<li><strong>Deliverable</strong>: FastAPI integration with existing
+bridge</li>
+<li><strong>Location</strong>: <code>bridge/api/server.py</code></li>
+<li><strong>Features</strong>:
+<ul>
+<li>FastAPI server alongside existing CLI</li>
+<li>Port configuration</li>
+<li>Graceful shutdown handling</li>
+<li>Health check endpoints</li>
+</ul></li>
+</ul>
+<p><strong>Unit Tests</strong>:</p>
+<ul>
+<li>API server startup/shutdown</li>
+<li>Port binding</li>
+<li>Health check responses</li>
+<li>Error handling</li>
+</ul>
+<p><strong>Integration Tests</strong>:</p>
+<ul>
+<li>API server + CLI coexistence</li>
+<li>Resource sharing between components</li>
+<li>Performance impact on existing functionality</li>
+</ul>
+<h2 id="authentication-middleware-implementation">1.5: Authentication
+Middleware Implementation</h2>
+<ul>
+<li><strong>Deliverable</strong>: JWT validation for Bridge API</li>
+<li><strong>Location</strong>: <code>bridge/api/auth.py</code></li>
+<li><strong>Features</strong>:
+<ul>
+<li>JWT token validation (reuse existing auth logic)</li>
+<li>Session-scoped permissions</li>
+<li>Rate limiting</li>
+<li>Request logging</li>
+</ul></li>
+</ul>
+<p><strong>Unit Tests</strong>:</p>
+<ul>
+<li>JWT validation logic</li>
+<li>Permission checking</li>
+<li>Rate limiting functionality</li>
+<li>Request/response logging</li>
+</ul>
+<p><strong>Integration Tests</strong>:</p>
+<ul>
+<li>Authentication with existing backend</li>
+<li>Token refresh handling</li>
+<li>Multi-client support</li>
+</ul>
+<h2 id="session-control-endpoints-implementation">1.6: Session Control
+Endpoints Implementation</h2>
+<ul>
+<li><strong>Deliverable</strong>: REST endpoints for session
+management</li>
+<li><strong>Location</strong>:
+<code>bridge/api/routes/sessions.py</code></li>
+<li><strong>Endpoints</strong>:
+<ul>
+<li><code>POST /api/v1/sessions/start</code></li>
+<li><code>POST /api/v1/sessions/stop</code></li>
+<li><code>GET /api/v1/sessions/{session_id}/status</code></li>
+<li><code>GET /api/v1/sessions/{session_id}/files</code></li>
+</ul></li>
+</ul>
+<p><strong>Unit Tests</strong>:</p>
+<ul>
+<li>Endpoint request/response validation</li>
+<li>Session ID validation</li>
+<li>Error response formatting</li>
+<li>Input sanitization</li>
+</ul>
+<p><strong>Integration Tests</strong>:</p>
+<ul>
+<li>End-to-end session flow</li>
+<li>Concurrent session handling</li>
+<li>File upload verification</li>
+<li>Session cleanup</li>
+</ul>
+<h2 id="phase-1.3-integration-with-existing-systems">Phase 1.3:
+Integration with Existing Systems</h2>
+<h3 id="step-1.3.1-triggermanager-session-integration">Step 1.3.1:
+TriggerManager Session Integration</h3>
+<ul>
+<li><strong>Deliverable</strong>: Session-aware event handling</li>
+<li><strong>Location</strong>:
+<code>bridge/collectors/trigger_manager.py</code> (extend existing)</li>
+<li><strong>Features</strong>:
+<ul>
+<li>Session context in events</li>
+<li>Session-based collector filtering</li>
+<li>Session activity tracking</li>
+</ul></li>
+</ul>
+<p><strong>Unit Tests</strong>:</p>
+<ul>
+<li>Session context propagation</li>
+<li>Event filtering by session</li>
+<li>Session activity metrics</li>
+</ul>
+<p><strong>Integration Tests</strong>:</p>
+<ul>
+<li>Multi-session event isolation</li>
+<li>Performance impact on existing collectors</li>
+<li>Event history per session</li>
+</ul>
+<h3 id="step-1.3.2-uploader-session-support">Step 1.3.2: Uploader
+Session Support</h3>
+<ul>
+<li><strong>Deliverable</strong>: Session-based file uploads</li>
+<li><strong>Location</strong>: <code>bridge/uploader/uploader.py</code>
+(extend existing)</li>
+<li><strong>Features</strong>:
+<ul>
+<li>Session metadata in uploads</li>
+<li>Session completion detection</li>
+<li>Upload verification per session</li>
+</ul></li>
+</ul>
+<p><strong>Unit Tests</strong>:</p>
+<ul>
+<li>Session metadata inclusion</li>
+<li>Upload completion tracking</li>
+<li>Session file grouping</li>
+</ul>
+<p><strong>Integration Tests</strong>:</p>
+<ul>
+<li>Real GCP uploads with session data</li>
+<li>Upload verification workflow</li>
+<li>Session completion notification</li>
+</ul>
+<h2 id="phase-1-testing-validation">Phase 1 Testing &amp;
+Validation</h2>
+<h3 id="phase-1-integration-test-suite">Phase 1 Integration Test
+Suite</h3>
+<p><strong>Location</strong>:
+<code>tests/integration/test_session_api.py</code></p>
+<p><strong>Test Scenarios</strong>:</p>
+<ul>
+<li>Complete session workflow (start → collect → stop → upload →
+verify)</li>
+<li>Multi-session concurrent operation</li>
+<li>Session failure and recovery</li>
+<li>Authentication and authorization</li>
+<li>Performance under load</li>
+</ul>
+<h3 id="phase-1-acceptance-criteria">Phase 1 Acceptance Criteria</h3>
+<ul class="task-list">
+<li><label><input type="checkbox" />Sessions can be started/stopped via
+REST API</label></li>
+<li><label><input type="checkbox" />Session data is isolated between
+concurrent sessions</label></li>
+<li><label><input type="checkbox" />Session metadata is included in all
+uploads to GCP</label></li>
+<li><label><input type="checkbox" />Existing CLI functionality remains
+unaffected</label></li>
+<li><label><input type="checkbox" />All existing tests continue to
+pass</label></li>
+<li><label><input type="checkbox" />Performance regression &lt;
+5%</label></li>
+</ul>
+<hr />
+<h1 id="phase-2-forge-processing-integration">PHASE 2: Forge Processing
+Integration</h1>
+<p><strong>Goal</strong>: Extend forge pipeline to accept session-based
+processing requests</p>
+<p><strong>Repository</strong>:
+<code>flingoos-bridge-backend-service</code>
+<strong>Dependencies</strong>: Backend service, Firestore
+integration</p>
+<h2 id="phase-2.1-session-processing-api">Phase 2.1: Session Processing
+API</h2>
+<h3 id="step-2.1.1-session-processing-request-model">Step 2.1.1: Session
+Processing Request Model</h3>
+<ul>
+<li><strong>Deliverable</strong>: Request models for session
+processing</li>
+<li><strong>Location</strong>:
+<code>services/backend/models/session_requests.py</code></li>
+<li><strong>Features</strong>:
+<ul>
+<li>Session processing request validation</li>
+<li>Session time range specification</li>
+<li>Organization context handling</li>
+<li>Job ID generation</li>
+</ul></li>
+</ul>
+<p><strong>Unit Tests</strong>:</p>
+<ul>
+<li>Request model validation</li>
+<li>Time range validation</li>
+<li>Organization access control</li>
+<li>Job ID uniqueness</li>
+</ul>
+<h3 id="step-2.1.2-forge-cli-integration-endpoint">Step 2.1.2: Forge CLI
+Integration Endpoint</h3>
+<ul>
+<li><strong>Deliverable</strong>: Backend service endpoint to trigger
+local Forge CLI processing<br />
+</li>
+<li><strong>Location</strong>:
+<code>services/backend/routes/session_routes.py</code> (new)</li>
+<li><strong>New Endpoints</strong>:
+<ul>
+<li><code>POST /api/v1/sessions/{session_id}/process</code> - Trigger
+forge CLI execution</li>
+<li><code>GET /api/v1/sessions/{session_id}/status</code> - Check
+processing status<br />
+</li>
+</ul></li>
+<li><strong>Implementation</strong>: Backend service calls local
+<code>forge analyze</code> command with session parameters</li>
+</ul>
+<p><strong>Unit Tests</strong>:</p>
+<ul>
+<li>Endpoint request validation</li>
+<li>Job creation logic</li>
+<li>Status response formatting</li>
+<li>Error handling</li>
+</ul>
+<p><strong>Integration Tests</strong>:</p>
+<ul>
+<li>Forge CLI command execution</li>
+<li>Session parameter validation</li>
+<li>Process monitoring and status tracking</li>
+</ul>
+<h2 id="phase-2.2-forge-pipeline-session-support">Phase 2.2: Forge
+Pipeline Session Support</h2>
+<h3 id="step-2.2.1-session-data-fetcher">Step 2.2.1: Session Data
+Fetcher</h3>
+<ul>
+<li><strong>Deliverable</strong>: Component to fetch session-specific
+data from GCP</li>
+<li><strong>Location</strong>:
+<code>services/backend/forge/session_data_fetcher.py</code></li>
+<li><strong>Features</strong>:
+<ul>
+<li>Time-range based GCP file filtering</li>
+<li>Session metadata validation</li>
+<li>Data completeness verification</li>
+<li>Multi-file type handling (mouse, window, audio, etc.)</li>
+</ul></li>
+</ul>
+<p><strong>Unit Tests</strong>:</p>
+<ul>
+<li>Time range filtering logic</li>
+<li>File type detection</li>
+<li>Data validation</li>
+<li>Error handling for missing files</li>
+</ul>
+<p><strong>Integration Tests</strong>:</p>
+<ul>
+<li>Real GCP bucket access</li>
+<li>Session data retrieval</li>
+<li>Performance with large datasets</li>
+</ul>
+<h3 id="step-2.2.2-forge-cli-execution-integration">Step 2.2.2: Forge
+CLI Execution Integration</h3>
+<ul>
+<li><strong>Deliverable</strong>: Backend service integration with local
+Forge CLI tool</li>
+<li><strong>Location</strong>: Backend service worker process</li>
+<li><strong>Forge CLI Usage</strong>:
+<ul>
+<li><strong>Command</strong>:
+<code>forge analyze --org {org_id} --device {device_id} --from {start_time} --to {end_time}</code></li>
+<li><strong>Output Processing</strong>: Forge processes data locally and
+uploads to Firestore via <code>forge upload</code></li>
+<li><strong>Status Tracking</strong>: Monitor local forge process
+execution and Firestore upload completion</li>
+</ul></li>
+<li><strong>Authentication</strong>: Uses existing GCS credentials and
+Firestore service account</li>
+</ul>
+<p><strong>Unit Tests</strong>:</p>
+<ul>
+<li>Session data processing logic</li>
+<li>Workflow generation</li>
+<li>Status update mechanisms</li>
+<li>Output formatting</li>
+</ul>
+<p><strong>Integration Tests</strong>:</p>
+<ul>
+<li>Complete forge CLI execution workflow</li>
+<li>Local processing with GCS data download</li>
+<li>Firestore upload verification and status tracking</li>
+</ul>
+<h2 id="phase-2.3-workflow-status-tracking">Phase 2.3: Workflow Status
+Tracking</h2>
+<h3 id="step-2.3.1-firestore-job-status-schema">Step 2.3.1: Firestore
+Job Status Schema</h3>
+<ul>
+<li><strong>Deliverable</strong>: Job tracking in Firestore</li>
+<li><strong>Location</strong>: Firestore collections design</li>
+<li><strong>Collections</strong>:
+<ul>
+<li><code>organizations/{org_id}/processing_jobs/{job_id}</code></li>
+<li><code>organizations/{org_id}/session_workflows/{session_id}</code></li>
+</ul></li>
+<li><strong>Status Values</strong>: <code>queued</code>,
+<code>processing</code>, <code>completed</code>,
+<code>failed</code></li>
+</ul>
+<p><strong>Unit Tests</strong>:</p>
+<ul>
+<li>Schema validation</li>
+<li>Status transition logic</li>
+<li>Data structure tests</li>
+</ul>
+<p><strong>Integration Tests</strong>:</p>
+<ul>
+<li>Real Firestore operations</li>
+<li>Multi-tenant data isolation</li>
+<li>Concurrent access handling</li>
+</ul>
+<h3 id="step-2.3.2-firestore-integration-for-results-retrieval">Step
+2.3.2: Firestore Integration for Results Retrieval</h3>
+<ul>
+<li><strong>Deliverable</strong>: Direct Firestore integration for
+accessing forge-processed workflows</li>
+<li><strong>Location</strong>: Backend service Firestore client</li>
+<li><strong>Firestore Collections</strong> (used by Forge CLI):
+<ul>
+<li><code>organizations/{org_id}/workflows/{session_id}/files/</code> -
+Workflow files uploaded by forge</li>
+<li><code>organizations/{org_id}/reports/</code> - Generated
+reports</li>
+</ul></li>
+<li><strong>New Backend Endpoints</strong>:
+<ul>
+<li><code>GET /api/v1/sessions/{session_id}/workflow</code> - Retrieve
+workflow from Firestore</li>
+<li><code>GET /api/v1/sessions/{session_id}/status</code> - Check if
+forge processing completed</li>
+</ul></li>
+</ul>
+<p><strong>Unit Tests</strong>:</p>
+<ul>
+<li>Status retrieval logic</li>
+<li>Error response formatting</li>
+<li>Permission validation</li>
+</ul>
+<p><strong>Integration Tests</strong>:</p>
+<ul>
+<li>Real-time status updates</li>
+<li>Polling performance</li>
+<li>Multi-user access</li>
+</ul>
+<h2 id="phase-2-testing-validation">Phase 2 Testing &amp;
+Validation</h2>
+<h3 id="phase-2-integration-test-suite">Phase 2 Integration Test
+Suite</h3>
+<p><strong>Location</strong>:
+<code>tests/integration/test_session_processing.py</code></p>
+<p><strong>Test Scenarios</strong>:</p>
+<ul>
+<li>Complete session processing workflow</li>
+<li>Job status tracking and updates</li>
+<li>Multi-tenant data isolation</li>
+<li>Error handling and recovery</li>
+<li>Performance with realistic datasets</li>
+</ul>
+<h3 id="phase-2-acceptance-criteria">Phase 2 Acceptance Criteria</h3>
+<ul class="task-list">
+<li><label><input type="checkbox" />Session processing can be triggered
+via API</label></li>
+<li><label><input type="checkbox" />Job status is tracked and
+queryable</label></li>
+<li><label><input type="checkbox" />Processed workflows are stored in
+Firestore</label></li>
+<li><label><input type="checkbox" />Multi-tenant isolation is
+maintained</label></li>
+<li><label><input type="checkbox" />Processing handles missing or
+incomplete data gracefully</label></li>
+<li><label><input type="checkbox" />Existing Forge functionality remains
+unaffected</label></li>
+</ul>
+<hr />
+<h1 id="phase-3-session-end-flush-enhanced-metadata">PHASE 3: Session-End Flush & Enhanced Metadata Architecture</h1>
+<p><strong>Goal</strong>: Implement comprehensive session-end data flush mechanism and enhanced session metadata for reliable forge analysis</p>
+<p><strong>Repository</strong>: <code>flingoos-bridge</code>
+<strong>Dependencies</strong>: SessionManager, collectors architecture, uploader system</p>
+
+<h2 id="phase-3-context-critical-data-integrity-gaps">Phase 3 Context: Critical Data Integrity Gaps</h2>
+<p><strong>Problem Identified</strong>: Current bridge architecture has critical gaps in session boundary management:</p>
+<ul>
+<li>❌ <strong>No Session-End Flush</strong>: Collectors upload data in batches, leaving pending events unuploaded when sessions end</li>
+<li>❌ <strong>Incomplete Session Metadata</strong>: No comprehensive JSON metadata for forge analysis with device context and precise timestamps</li>
+<li>❌ <strong>Mixed Upload Behavior</strong>: Audio uploads immediately, but mouse/keyboard data remains in local batches</li>
+<li>❌ <strong>No Reliable Session Boundaries</strong>: Cannot guarantee all session data is uploaded before forge processing</li>
+</ul>
+
+<p><strong>Impact</strong>: Forge analysis receives incomplete data, leading to inaccurate workflow generation and user frustration.</p>
+
+<h2 id="phase-3.1-session-flush-architecture">Phase 3.1: Session Flush Architecture</h2>
+
+<h3 id="step-3.1.1-collector-flush-interface">Step 3.1.1: Collector Flush Interface</h3>
+<ul>
+<li><strong>Deliverable</strong>: Universal flush interface for all collectors</li>
+<li><strong>Location</strong>: <code>bridge/collectors/base_collector.py</code></li>
+<li><strong>Features</strong>:
+<ul>
+<li>Abstract <code>force_flush()</code> method for immediate upload</li>
+<li>Session-aware flush with session_id context</li>
+<li>Flush status tracking and verification</li>
+<li>Timeout handling for flush operations</li>
+</ul></li>
+</ul>
+
+<p><strong>Unit Tests</strong>:</p>
+<ul>
+<li>Flush interface implementation verification</li>
+<li>Session context propagation</li>
+<li>Timeout handling behavior</li>
+<li>Flush status reporting accuracy</li>
+</ul>
+
+<h3 id="step-3.1.2-mouse-tracker-flush-implementation">Step 3.1.2: Mouse Tracker Flush Implementation</h3>
+<ul>
+<li><strong>Deliverable</strong>: Force flush pending mouse events</li>
+<li><strong>Location</strong>: <code>bridge/collectors/mouse_tracker.py</code></li>
+<li><strong>Features</strong>:
+<ul>
+<li>Flush all pending mouse events regardless of batch size</li>
+<li>Session-end metadata inclusion</li>
+<li>Upload verification and retry logic</li>
+<li>Preserve existing batched upload behavior for normal operation</li>
+</ul></li>
+</ul>
+
+<p><strong>Integration Tests</strong>:</p>
+<ul>
+<li>Mouse events flush completely on session end</li>
+<li>Normal batching behavior remains unchanged</li>
+<li>Upload verification success rate</li>
+</ul>
+
+<h3 id="step-3.1.3-keyboard-tracker-flush-implementation">Step 3.1.3: Keyboard Tracker Flush Implementation</h3>
+<ul>
+<li><strong>Deliverable</strong>: Force flush pending keyboard events</li>
+<li><strong>Location</strong>: <code>bridge/collectors/keyboard_tracker.py</code></li>
+<li><strong>Features</strong>:
+<ul>
+<li>Flush all pending keyboard events regardless of batch size</li>
+<li>Privacy-aware metadata (no keystrokes, only timing/activity)</li>
+<li>Session boundary marking</li>
+<li>Dual-mode operation (normal batching vs session flush)</li>
+</ul></li>
+</ul>
+
+<h3 id="step-3.1.4-screenshot-collector-flush-implementation">Step 3.1.4: Screenshot Collector Flush Implementation</h3>
+<ul>
+<li><strong>Deliverable</strong>: Force flush pending screenshots</li>
+<li><strong>Location</strong>: <code>bridge/collectors/screenshot_collector.py</code></li>
+<li><strong>Features</strong>:
+<ul>
+<li>Flush any pending screenshot uploads</li>
+<li>Session-end screenshot capture for completeness</li>
+<li>Upload verification with retry logic</li>
+<li>Maintain existing immediate upload behavior</li>
+</ul></li>
+</ul>
+
+<h2 id="phase-3.2-session-manager-flush-orchestration">Phase 3.2: Session Manager Flush Orchestration</h2>
+
+<h3 id="step-3.2.1-session-flush-coordinator">Step 3.2.1: Session Flush Coordinator</h3>
+<ul>
+<li><strong>Deliverable</strong>: Central session flush orchestration</li>
+<li><strong>Location</strong>: <code>bridge/services/session_manager.py</code></li>
+<li><strong>Features</strong>:
+<ul>
+<li>Coordinate flush across all active collectors</li>
+<li>Parallel flush execution with timeout management</li>
+<li>Flush completion verification before session finalization</li>
+<li>Error handling and partial flush recovery</li>
+</ul></li>
+</ul>
+
+<p><strong>Unit Tests</strong>:</p>
+<ul>
+<li>Multi-collector flush orchestration</li>
+<li>Timeout handling and recovery</li>
+<li>Partial flush error scenarios</li>
+<li>Session state management during flush</li>
+</ul>
+
+<h3 id="step-3.2.2-session-metadata-generator">Step 3.2.2: Session Metadata Generator</h3>
+<ul>
+<li><strong>Deliverable</strong>: Comprehensive session metadata JSON</li>
+<li><strong>Location</strong>: <code>bridge/services/session_metadata.py</code></li>
+<li><strong>Features</strong>:
+<ul>
+<li>Device context (device_id, OS, hardware specs)</li>
+<li>Session timing (precise start/end timestamps, duration)</li>
+<li>Collector summary (enabled collectors, data counts, upload status)</li>
+<li>User context (org_id, user_email, session trigger)</li>
+<li>Data integrity verification checksums</li>
+</ul></li>
+</ul>
+
+<p><strong>Metadata JSON Structure</strong>:</p>
+<div class="sourceCode" id="cb-session-metadata"><pre class="sourceCode json"><code class="sourceCode json"><span>{</span>
+<span>  "session_id": "uuid-here",</span>
+<span>  "device_context": {</span>
+<span>    "device_id": "maayan-mac-abc123",</span>
+<span>    "os": "macOS 14.1.0",</span>
+<span>    "hardware": "MacBook Pro M2"</span>
+<span>  },</span>
+<span>  "session_timing": {</span>
+<span>    "start_time": "2024-01-15T09:00:00Z",</span>
+<span>    "end_time": "2024-01-15T09:15:30Z",</span>
+<span>    "duration_seconds": 930,</span>
+<span>    "timezone": "America/New_York"</span>
+<span>  },</span>
+<span>  "user_context": {</span>
+<span>    "org_id": "diligent4",</span>
+<span>    "user_email": "maayan@diligent4.com",</span>
+<span>    "session_trigger": "manual_desktop_ui"</span>
+<span>  },</span>
+<span>  "collectors_summary": {</span>
+<span>    "enabled": ["mouse", "keyboard", "screenshot", "audio"],</span>
+<span>    "data_counts": {</span>
+<span>      "mouse_events": 1247,</span>
+<span>      "keyboard_events": 892,</span>
+<span>      "screenshots": 31,</span>
+<span>      "audio_files": 1</span>
+<span>    },</span>
+<span>    "upload_status": "completed",</span>
+<span>    "flush_completion_time": "2024-01-15T09:15:45Z"</span>
+<span>  },</span>
+<span>  "data_integrity": {</span>
+<span>    "checksum": "sha256-hash-here",</span>
+<span>    "verification": "passed"</span>
+<span>  }</span>
+<span>}</span></code></pre></div>
+
+<h2 id="phase-3.3-clock-based-testing-framework">Phase 3.3: Clock-Based Testing Framework</h2>
+
+<h3 id="step-3.3.1-precision-timing-test-suite">Step 3.3.1: Precision Timing Test Suite</h3>
+<ul>
+<li><strong>Deliverable</strong>: Automated session boundary testing</li>
+<li><strong>Location</strong>: <code>tests/integration/test_session_flush_timing.py</code></li>
+<li><strong>Features</strong>:
+<ul>
+<li>Clock-based session start/stop at precise intervals</li>
+<li>Data integrity verification across session boundaries</li>
+<li>Upload completion validation</li>
+<li>Performance benchmarking for flush operations</li>
+</ul></li>
+</ul>
+
+<p><strong>Test Scenarios</strong>:</p>
+<ul>
+<li>5-second micro-sessions with immediate flush</li>
+<li>15-minute standard sessions with comprehensive data</li>
+<li>30-second rapid session cycling</li>
+<li>Concurrent multi-session flush testing</li>
+<li>Network failure during flush recovery</li>
+</ul>
+
+<h2 id="phase-3-testing-validation">Phase 3 Testing & Validation</h2>
+
+<h3 id="phase-3-integration-test-suite">Phase 3 Integration Test Suite</h3>
+<p><strong>Location</strong>: <code>tests/integration/test_session_flush_comprehensive.py</code></p>
+
+<p><strong>Test Scenarios</strong>:</p>
+<ul>
+<li>Complete session workflow with flush verification</li>
+<li>Multi-collector concurrent flush operations</li>
+<li>Session metadata accuracy and completeness</li>
+<li>Upload verification and data integrity</li>
+<li>Error recovery and partial flush handling</li>
+<li>Performance impact on existing continuous collection</li>
+</ul>
+
+<h3 id="phase-3-acceptance-criteria">Phase 3 Acceptance Criteria</h3>
+<ul class="task-list">
+<li><label><input type="checkbox" />All pending collector data flushes immediately on session end</label></li>
+<li><label><input type="checkbox" />Session metadata JSON is created with complete device/user context</label></li>
+<li><label><input type="checkbox" />Flush operations complete within 10 seconds for typical sessions</label></li>
+<li><label><input type="checkbox" />Normal continuous collection behavior remains unchanged</label></li>
+<li><label><input type="checkbox" />Upload verification achieves 99%+ success rate</label></li>
+<li><label><input type="checkbox" />Session boundaries are precisely enforced</label></li>
+<li><label><input type="checkbox" />Forge processing receives complete session data</label></li>
+</ul>
+
+<hr />
+
+<h1 id="phase-4-desktop-ui-integration">PHASE 4: Desktop UI
+Integration</h1>
+<p><strong>Goal</strong>: Integrate desktop service UI into
+flingoos-bridge as web-based interface</p>
+<p><strong>Repository</strong>: <code>flingoos-bridge</code>
+<strong>Dependencies</strong>: Local desktop UI framework, bridge
+integration</p>
+<h2 id="phase-4.1-service-architecture">Phase 4.1: Service
+Architecture</h2>
+<h3 id="step-4.1.1-local-desktop-ui-framework-setup">Step 4.1.1: Local
+Desktop UI Framework Setup</h3>
+<ul>
+<li><strong>Deliverable</strong>: Native desktop UI application</li>
+<li><strong>Location</strong>: <code>bridge/ui/desktop/</code></li>
+<li><strong>Features</strong>:
+<ul>
+<li><strong>Option 1: Electron + React</strong> - Familiar web
+technologies, cross-platform</li>
+<li><strong>Option 2: Tauri + React</strong> - Rust backend, smaller
+footprint, better security</li>
+<li><strong>Option 3: PyQt/PySide</strong> - Native Python integration,
+existing ecosystem</li>
+<li><strong>Option 4: Tkinter</strong> - Built-in Python, minimal
+dependencies</li>
+</ul></li>
+<li><strong>Integration</strong>: Embedded within bridge.exe
+executable</li>
+</ul>
+<p><strong>Unit Tests</strong>:</p>
+<ul>
+<li>Service startup/shutdown</li>
+<li>Configuration loading</li>
+<li>Request routing</li>
+<li>Error handling</li>
+</ul>
+<p><strong>Integration Tests</strong>:</p>
+<ul>
+<li>Service health checks</li>
+<li>Configuration validation</li>
+<li>Resource cleanup</li>
+</ul>
+<h3 id="step-3.1.2-external-service-clients">Step 4.1.2: External
+Service Clients</h3>
+<ul>
+<li><strong>Deliverable</strong>: HTTP clients for Bridge and Forge
+APIs</li>
+<li><strong>Location</strong>: <code>src/clients/</code></li>
+<li><strong>Features</strong>:
+<ul>
+<li>Bridge API client with authentication</li>
+<li>Forge API client with authentication</li>
+<li>Firestore client for status polling</li>
+<li>Error handling and retries</li>
+</ul></li>
+</ul>
+<p><strong>Unit Tests</strong>:</p>
+<ul>
+<li>Client authentication</li>
+<li>Request/response handling</li>
+<li>Error parsing</li>
+<li>Retry logic</li>
+</ul>
+<p><strong>Integration Tests</strong>:</p>
+<ul>
+<li>Real API communication</li>
+<li>Authentication token management</li>
+<li>Network error handling</li>
+</ul>
+<h2 id="phase-3.2-session-orchestration">Phase 4.2: Session
+Orchestration</h2>
+<h3 id="step-3.2.1-session-controller">Step 4.2.1: Session
+Controller</h3>
+<ul>
+<li><strong>Deliverable</strong>: Core session management logic</li>
+<li><strong>Location</strong>:
+<code>src/controllers/session_controller.py</code></li>
+<li><strong>Features</strong>:
+<ul>
+<li>Session lifecycle management</li>
+<li>Bridge API integration</li>
+<li>Forge API integration</li>
+<li>Status polling coordination</li>
+</ul></li>
+</ul>
+<p><strong>Unit Tests</strong>:</p>
+<ul>
+<li>Session creation and management</li>
+<li>API call orchestration</li>
+<li>Status update handling</li>
+<li>Error recovery logic</li>
+</ul>
+<p><strong>Integration Tests</strong>:</p>
+<ul>
+<li>End-to-end session workflow</li>
+<li>Multi-session handling</li>
+<li>Error scenarios</li>
+</ul>
+<h3 id="step-3.2.2-workflow-manager">Step 4.2.2: Workflow Manager</h3>
+<ul>
+<li><strong>Deliverable</strong>: Workflow retrieval and caching</li>
+<li><strong>Location</strong>:
+<code>src/controllers/workflow_controller.py</code></li>
+<li><strong>Features</strong>:
+<ul>
+<li>Workflow status polling</li>
+<li>Workflow data retrieval</li>
+<li>Local caching for performance</li>
+<li>Data formatting for UI</li>
+</ul></li>
+</ul>
+<p><strong>Unit Tests</strong>:</p>
+<ul>
+<li>Status polling logic</li>
+<li>Workflow retrieval</li>
+<li>Caching mechanisms</li>
+<li>Data transformation</li>
+</ul>
+<p><strong>Integration Tests</strong>:</p>
+<ul>
+<li>Real Firestore integration</li>
+<li>Polling performance</li>
+<li>Cache consistency</li>
+</ul>
+<h2 id="phase-3.3-authentication-integration">Phase 4.3: Authentication
+Integration</h2>
+<h3 id="step-3.3.1-auth-service-integration">Step 4.3.1: Auth Service
+Integration</h3>
+<ul>
+<li><strong>Deliverable</strong>: Authentication with existing
+systems</li>
+<li><strong>Location</strong>: <code>src/auth/</code></li>
+<li><strong>Features</strong>:
+<ul>
+<li>JWT token management</li>
+<li>Multi-service authentication</li>
+<li>Token refresh handling</li>
+<li>User session management</li>
+</ul></li>
+</ul>
+<p><strong>Unit Tests</strong>:</p>
+<ul>
+<li>Token validation and refresh</li>
+<li>Multi-service auth handling</li>
+<li>Session management</li>
+<li>Permission checking</li>
+</ul>
+<p><strong>Integration Tests</strong>:</p>
+<ul>
+<li>Authentication with Bridge API</li>
+<li>Authentication with Forge API</li>
+<li>Token lifecycle management</li>
+</ul>
+<h2 id="phase-3-testing-validation">Phase 4 Testing &amp;
+Validation</h2>
+<h3 id="phase-3-integration-test-suite">Phase 4 Integration Test
+Suite</h3>
+<p><strong>Location</strong>:
+<code>tests/integration/test_desktop_service_core.py</code></p>
+<p><strong>Test Scenarios</strong>:</p>
+<ul>
+<li>Complete session orchestration workflow</li>
+<li>Multi-service authentication</li>
+<li>Error handling across services</li>
+<li>Performance under concurrent sessions</li>
+</ul>
+<h3 id="phase-4-acceptance-criteria">Phase 4 Acceptance Criteria</h3>
+<ul class="task-list">
+<li><label><input type="checkbox" />Desktop service can orchestrate
+complete session workflow</label></li>
+<li><label><input type="checkbox" />Authentication works with all
+external services</label></li>
+<li><label><input type="checkbox" />Sessions are properly isolated and
+managed</label></li>
+<li><label><input type="checkbox" />Error handling provides meaningful
+feedback</label></li>
+<li><label><input type="checkbox" />Performance meets requirements (&lt;
+2s session start)</label></li>
+</ul>
+<hr />
+<h1 id="phase-5-installer-distribution-integration">PHASE 5: Installer
+&amp; Distribution Integration</h1>
+<p><strong>Goal</strong>: Integrate desktop service into existing
+Flingoos Bridge installer and distribution system</p>
+<p><strong>Repository</strong>: <code>flingoos-bridge</code>
+<strong>Dependencies</strong>: PyInstaller, Inno Setup, auto-updater</p>
+<h2 id="pyinstaller-integration-for-desktop-ui">5.1: PyInstaller
+Integration for Desktop UI</h2>
+<p><strong>Decision/Challenge:</strong> Integrating desktop service web
+UI components and dependencies into existing PyInstaller build system
+without breaking existing functionality.</p>
+<p><strong>Context:</strong> Current <code>flingoos-bridge.spec</code>
+builds Windows executable with collectors, tray UI, and updater. Need to
+add desktop service UI components (likely web-based) while maintaining
+existing build process and dependencies.</p>
+<p><strong>Resolution:</strong> Extend PyInstaller configuration:</p>
+<ul>
+<li>Add desktop UI static assets to <code>datas</code> collection</li>
+<li>Include web framework dependencies (FastAPI, static files) in
+<code>hiddenimports</code></li>
+<li>Bundle desktop service templates and assets</li>
+<li>Maintain existing collector and tray functionality</li>
+</ul>
+<p><strong>Testing:</strong></p>
+<ul>
+<li>Unit tests: Build system produces working executable with desktop
+components</li>
+<li>Integration tests: Desktop mode launches without affecting tray
+mode, resource bundling verification</li>
+</ul>
+<p><strong>Impact:</strong> Enables single executable distribution with
+both existing bridge functionality and new desktop service UI.</p>
+<p><strong>Follow-up:</strong> Next step is Inno Setup installer
+integration.</p>
+<h2 id="inno-setup-installer-extension">5.2: Inno Setup Installer
+Extension</h2>
+<p><strong>Decision/Challenge:</strong> Extending existing
+<code>installer.iss</code> to support desktop service mode while
+maintaining current installation and configuration flow.</p>
+<p><strong>Context:</strong> Current installer prompts for username,
+sets up auto-start, and configures permissions. Need to add desktop
+service mode option while maintaining existing workflow for users who
+prefer tray mode.</p>
+<p><strong>Resolution:</strong> Enhance installer configuration:</p>
+<ul>
+<li>Add desktop service mode selection in installer UI</li>
+<li>Extend configuration template with desktop service settings</li>
+<li>Add desktop service icons and shortcuts</li>
+<li>Maintain backward compatibility with existing installations</li>
+</ul>
+<p><strong>Testing:</strong></p>
+<ul>
+<li>Unit tests: Installer configuration validation, template
+processing</li>
+<li>Integration tests: Fresh installation with desktop mode, upgrade
+from existing installation</li>
+</ul>
+<p><strong>Impact:</strong> Provides unified installation experience
+with user choice between tray mode and desktop service mode.</p>
+<p><strong>Follow-up:</strong> Next step is auto-updater
+integration.</p>
+<h2 id="auto-updater-desktop-service-support">5.3: Auto-Updater Desktop
+Service Support</h2>
+<p><strong>Decision/Challenge:</strong> Ensuring existing Go
+auto-updater system properly handles desktop service components during
+updates.</p>
+<p><strong>Context:</strong> Current <code>updater/main.go</code>
+handles bridge.exe replacement with UAC elevation, health checks, and
+restart logic. Desktop service adds web UI components that may require
+different restart logic.</p>
+<p><strong>Resolution:</strong> Extend updater functionality:</p>
+<ul>
+<li>Update health check to verify desktop service endpoints</li>
+<li>Modify restart logic to detect desktop vs tray mode</li>
+<li>Ensure UI assets are properly updated</li>
+<li>Maintain existing security and verification systems</li>
+</ul>
+<p><strong>Testing:</strong></p>
+<ul>
+<li>Unit tests: Health check logic, restart detection, mode
+switching</li>
+<li>Integration tests: Complete update workflow in desktop mode,
+fallback handling</li>
+</ul>
+<p><strong>Impact:</strong> Ensures seamless auto-updates for desktop
+service installations without breaking existing tray mode updates.</p>
+<p><strong>Follow-up:</strong> Next step is version synchronization and
+build integration.</p>
+<h2 id="build-system-integration">5.4: Build System Integration</h2>
+<p><strong>Decision/Challenge:</strong> Integrating desktop service
+components into existing build scripts while maintaining development and
+CI/CD workflows.</p>
+<p><strong>Context:</strong> Current
+<code>scripts/build-installer.ps1</code> handles Python dependencies, Go
+compilation, code signing, and installer generation. Desktop service may
+add web UI build steps and additional dependencies.</p>
+<p><strong>Resolution:</strong> Enhance build automation:</p>
+<ul>
+<li>Extend build script with desktop UI compilation steps</li>
+<li>Add desktop service dependencies to requirements</li>
+<li>Update CI/CD workflows to include desktop components</li>
+<li>Maintain existing build verification and testing</li>
+</ul>
+<p><strong>Testing:</strong></p>
+<ul>
+<li>Unit tests: Build script execution, dependency resolution</li>
+<li>Integration tests: Complete build pipeline produces working
+installer</li>
+</ul>
+<p><strong>Impact:</strong> Provides automated build and distribution
+pipeline for unified bridge+desktop service application.</p>
+<p><strong>Follow-up:</strong> Next step is deployment testing and
+validation.</p>
+<h2 id="distribution-system-validation">5.5: Distribution System
+Validation</h2>
+<p><strong>Decision/Challenge:</strong> Validating complete distribution
+pipeline ensures desktop service integrates seamlessly with existing
+deployment infrastructure.</p>
+<p><strong>Context:</strong> Current distribution uses GitHub Actions,
+signed releases, and update manifests. Desktop service must integrate
+without disrupting existing user update workflows or deployment
+processes.</p>
+<p><strong>Resolution:</strong> Complete distribution validation:</p>
+<ul>
+<li>Test update manifests include desktop service components</li>
+<li>Verify signature verification works with enhanced executable</li>
+<li>Validate upgrade paths from existing installations</li>
+<li>Ensure deployment scripts handle new components</li>
+</ul>
+<p><strong>Testing:</strong></p>
+<ul>
+<li>Unit tests: Update manifest validation, signature verification</li>
+<li>Integration tests: Complete upgrade workflow from current production
+version</li>
+</ul>
+<p><strong>Impact:</strong> Ensures reliable distribution of desktop
+service to existing user base without disruption.</p>
+<p><strong>Follow-up:</strong> Phase 5 integration testing and
+production deployment.</p>
+<hr />
+<h1 id="phase-6-integration-testing-deployment">PHASE 6: Integration
+Testing &amp; Deployment</h1>
+<p><strong>Goal</strong>: End-to-end system validation and production
+deployment preparation</p>
+<p><strong>Dependencies</strong>: All systems integration</p>
+<h2 id="phase-5.1-system-integration-testing">Phase 6.1: System
+Integration Testing</h2>
+<h3 id="step-5.1.1-end-to-end-test-suite">Step 6.1.1: End-to-End Test
+Suite</h3>
+<ul>
+<li><strong>Deliverable</strong>: Complete system integration tests</li>
+<li><strong>Location</strong>: <code>tests/e2e/</code></li>
+<li><strong>Scenarios</strong>:
+<ul>
+<li>Complete user workflow (UI → Bridge → GCP → Forge → Firestore →
+UI)</li>
+<li>Multi-tenant isolation</li>
+<li>Concurrent session handling</li>
+<li>Error recovery workflows</li>
+<li>Performance under load</li>
+</ul></li>
+</ul>
+<h3 id="step-5.1.2-security-testing">Step 6.1.2: Security Testing</h3>
+<ul>
+<li><strong>Deliverable</strong>: Security validation suite</li>
+<li><strong>Location</strong>: <code>tests/security/</code></li>
+<li><strong>Focus Areas</strong>:
+<ul>
+<li>Authentication and authorization</li>
+<li>Multi-tenant data isolation</li>
+<li>API security</li>
+<li>Token handling</li>
+<li>Data encryption</li>
+</ul></li>
+</ul>
+<h2 id="phase-5.2-deployment-distribution">Phase 6.2: Deployment &amp;
+Distribution</h2>
+<h3 id="step-5.2.1-deployment-configuration">Step 6.2.1: Deployment
+Configuration</h3>
+<ul>
+<li><strong>Deliverable</strong>: Production deployment setup</li>
+<li><strong>Features</strong>:
+<ul>
+<li>Configuration management</li>
+<li>Environment separation</li>
+<li>Monitoring and logging</li>
+<li>Health checks</li>
+</ul></li>
+</ul>
+<h3 id="step-5.2.2-distribution-package">Step 6.2.2: Distribution
+Package</h3>
+<ul>
+<li><strong>Deliverable</strong>: Desktop application installer</li>
+<li><strong>Features</strong>:
+<ul>
+<li>Cross-platform installer</li>
+<li>Auto-update capabilities</li>
+<li>Configuration wizard</li>
+<li>Uninstall procedures</li>
+</ul></li>
+</ul>
+<h2 id="phase-5-testing-validation">Phase 6 Testing &amp;
+Validation</h2>
+<h3 id="phase-6-acceptance-criteria">Phase 6 Acceptance Criteria</h3>
+<ul class="task-list">
+<li><label><input type="checkbox" />Complete system works
+end-to-end</label></li>
+<li><label><input type="checkbox" />Security requirements are
+met</label></li>
+<li><label><input type="checkbox" />Performance requirements are
+satisfied</label></li>
+<li><label><input type="checkbox" />Deployment is automated and
+reliable</label></li>
+<li><label><input type="checkbox" />Distribution package works across
+target platforms</label></li>
+</ul>
+<hr />
+<h1 id="success-metrics">Success Metrics</h1>
+<h2 id="functional-requirements">Functional Requirements</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" />Sessions can be started and stopped
+from desktop UI</label></li>
+<li><label><input type="checkbox" />Session data is processed
+automatically after stop</label></li>
+<li><label><input type="checkbox" />Workflows are displayed within 60
+seconds of processing completion</label></li>
+<li><label><input type="checkbox" />Multi-tenant data isolation is
+maintained</label></li>
+<li><label><input type="checkbox" />System handles 10 concurrent
+sessions per organization</label></li>
+</ul>
+<h2 id="performance-requirements">Performance Requirements</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" />Session start response time &lt; 2
+seconds</label></li>
+<li><label><input type="checkbox" />Workflow processing completion
+notification &lt; 60 seconds</label></li>
+<li><label><input type="checkbox" />UI remains responsive during all
+operations</label></li>
+<li><label><input type="checkbox" />System memory usage &lt; 500MB
+during normal operation</label></li>
+</ul>
+<h2 id="security-requirements">Security Requirements</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" />All API communications use JWT
+authentication</label></li>
+<li><label><input type="checkbox" />Multi-tenant data isolation is
+verified</label></li>
+<li><label><input type="checkbox" />Audit logs capture all user
+actions</label></li>
+<li><label><input type="checkbox" />No credentials stored in
+plaintext</label></li>
+</ul>
+<h2 id="reliability-requirements">Reliability Requirements</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" />System handles network
+disconnections gracefully</label></li>
+<li><label><input type="checkbox" />Session data is not lost during
+system failures</label></li>
+<li><label><input type="checkbox" />Error messages are clear and
+actionable</label></li>
+<li><label><input type="checkbox" />System recovery is automatic where
+possible</label></li>
+</ul>
+<hr />
+<h1 id="success-metrics-overview">Success Metrics Overview</h1>
+<h2 id="phase-dependencies">Phase Dependencies</h2>
+<table>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 34%" />
+<col style="width: 47%" />
+</colgroup>
+<thead>
+<tr>
+<th>Phase</th>
+<th>Focus</th>
+<th>Critical Dependencies</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Phase 1</strong></td>
+<td>Bridge Session API</td>
+<td>TriggerManager, existing collectors</td>
+</tr>
+<tr>
+<td><strong>Phase 2</strong></td>
+<td>Forge Processing</td>
+<td>Backend service, Firestore integration</td>
+</tr>
+<tr>
+<td><strong>Phase 3</strong></td>
+<td>Session-End Flush &amp; Enhanced Metadata</td>
+<td>SessionManager, collectors architecture, uploader system</td>
+</tr>
+<tr>
+<td><strong>Phase 4</strong></td>
+<td>Desktop UI Integration</td>
+<td>Local desktop UI framework, bridge integration</td>
+</tr>
+<tr>
+<td><strong>Phase 5</strong></td>
+<td><strong>Installer &amp; Distribution</strong></td>
+<td><strong>PyInstaller, Inno Setup, auto-updater</strong></td>
+</tr>
+<tr>
+<td><strong>Phase 6</strong></td>
+<td>Testing &amp; Deployment</td>
+<td>All systems integration</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Prerequisites</strong>: Access to current build
+infrastructure, understanding of existing collector architecture</p>
+<h2 id="updated-success-criteria">Updated Success Criteria</h2>
+<p><strong>Phase 4 Critical Success Metrics</strong> <em>(Previously
+Missing)</em>:</p>
+<ul class="task-list">
+<li><label><input type="checkbox" />Desktop service installs as single
+unified application with bridge</label></li>
+<li><label><input type="checkbox" />Existing users can upgrade
+seamlessly without losing configuration</label></li>
+<li><label><input type="checkbox" />Auto-updater handles desktop service
+components correctly</label></li>
+<li><label><input type="checkbox" />Installation size increase &lt; 50MB
+from current bridge installer</label></li>
+<li><label><input type="checkbox" />Build pipeline produces signed,
+verified installer automatically</label></li>
+</ul>
+<hr />
+<h2 id="implementation-notes">Implementation Notes</h2>
+<p><strong>Repository Strategy</strong>:</p>
+<ul>
+<li><strong>Primary Development</strong>: <code>flingoos-bridge</code>
+repository (Phases 1, 3, 4)</li>
+<li><strong>Backend Integration</strong>:
+<code>flingoos-bridge-backend-service</code> (Phase 2)</li>
+<li><strong>This Repository</strong>: Planning, documentation, and
+reference materials only</li>
+</ul>
+<p><strong>Development Methodology</strong>:</p>
+<ul>
+<li>Phase-based approach with comprehensive testing at each step</li>
+<li>Security validation and integration with existing systems
+throughout</li>
+<li>Maintains existing battle-tested security and distribution
+infrastructure</li>
+</ul>
+<p><strong>Architecture Benefits</strong>:</p>
+<ul>
+<li>✅ Single unified installation and auto-update system</li>
+<li>✅ Leverages existing enterprise-grade security (JWT + GCP +
+Firebase)</li>
+<li>✅ Maintains backward compatibility with current bridge
+functionality</li>
+<li>✅ Reduces maintenance overhead and user complexity</li>
+</ul>
+<p><strong>Prerequisites</strong>:</p>
+<ul>
+<li>Access to current build infrastructure and development tools</li>
+<li>Understanding of existing collector architecture and TriggerManager
+system</li>
+</ul>
+<hr />
+<h1 id="testing-strategy-comprehensive-credentialization-validation">🧪
+<strong>TESTING STRATEGY: Comprehensive Credentialization
+Validation</strong></h1>
+<h2 id="phase-1-testing-bridge-session-api-device-identity">Phase 1
+Testing: Bridge Session API + Device Identity</h2>
+<h3 id="unit-testing"><strong>Unit Testing</strong></h3>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># File: tests/unit/test_device_identity_desktop.py</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> TestDesktopDeviceIdentity:</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> test_desktop_uses_bridge_device_identity(<span class="va">self</span>):</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>        <span class="co">&quot;&quot;&quot;Desktop service uses same device ID as Bridge.&quot;&quot;&quot;</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>        <span class="im">from</span> bridge.device <span class="im">import</span> DeviceIdentity</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>        <span class="im">from</span> bridge.ui.desktop.device_resolver <span class="im">import</span> DesktopDeviceResolver</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>        bridge_id <span class="op">=</span> DeviceIdentity.get_device_id()</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>        desktop_id <span class="op">=</span> DesktopDeviceResolver.get_current_device_id()</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">assert</span> bridge_id <span class="op">==</span> desktop_id</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">assert</span> bridge_id.count(<span class="st">&#39;-&#39;</span>) <span class="op">==</span> <span class="dv">1</span>  <span class="co"># hostname-fingerprint format</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">assert</span> <span class="bu">len</span>(bridge_id.split(<span class="st">&#39;-&#39;</span>)[<span class="dv">1</span>]) <span class="op">==</span> <span class="dv">8</span>  <span class="co"># 8-char fingerprint</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="co"># File: tests/unit/test_session_user_binding.py  </span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> TestSessionUserBinding:</span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> test_session_includes_user_context(<span class="va">self</span>):</span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>        <span class="co">&quot;&quot;&quot;Sessions are created with user context from JWT.&quot;&quot;&quot;</span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>        user_jwt <span class="op">=</span> create_mock_jwt(<span class="st">&quot;alice@org1.com&quot;</span>, <span class="st">&quot;org1&quot;</span>)</span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>        device_id <span class="op">=</span> DeviceIdentity.get_device_id()</span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>        session <span class="op">=</span> create_session_with_user_context(</span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>            device_id<span class="op">=</span>device_id,</span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>            user_jwt<span class="op">=</span>user_jwt,</span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>            collectors<span class="op">=</span>[<span class="st">&quot;mouse&quot;</span>, <span class="st">&quot;window&quot;</span>]</span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>        <span class="cf">assert</span> session.device_id <span class="op">==</span> device_id</span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>        <span class="cf">assert</span> session.user_email <span class="op">==</span> <span class="st">&quot;alice@org1.com&quot;</span></span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a>        <span class="cf">assert</span> session.org_id <span class="op">==</span> <span class="st">&quot;org1&quot;</span></span></code></pre></div>
+<h3 id="integration-testing"><strong>Integration Testing</strong></h3>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># File: tests/integration/test_bridge_desktop_session_flow.py</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> TestBridgeDesktopSessionIntegration:</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> test_user_session_creation_flow(<span class="va">self</span>):</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>        <span class="co">&quot;&quot;&quot;Complete user-initiated session creation.&quot;&quot;&quot;</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 1. User authenticates in Desktop UI</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>        user_jwt <span class="op">=</span> firebase_auth.authenticate(<span class="st">&quot;alice@org1.com&quot;</span>, <span class="st">&quot;password&quot;</span>)</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>        device_id <span class="op">=</span> DeviceIdentity.get_device_id()</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 2. Desktop UI starts session on Bridge</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>        response <span class="op">=</span> bridge_client.start_session(</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>            device_id<span class="op">=</span>device_id,</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>            collectors<span class="op">=</span>[<span class="st">&quot;mouse&quot;</span>, <span class="st">&quot;window&quot;</span>, <span class="st">&quot;keyboard&quot;</span>],</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>            user_context<span class="op">=</span>{<span class="st">&quot;jwt&quot;</span>: user_jwt, <span class="st">&quot;email&quot;</span>: <span class="st">&quot;alice@org1.com&quot;</span>}</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 3. Verify session metadata</span></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>        session_id <span class="op">=</span> response[<span class="st">&quot;session_id&quot;</span>]</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>        session_data <span class="op">=</span> bridge_client.get_session_status(session_id)</span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>        <span class="cf">assert</span> session_data[<span class="st">&quot;device_id&quot;</span>] <span class="op">==</span> device_id</span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>        <span class="cf">assert</span> session_data[<span class="st">&quot;user_email&quot;</span>] <span class="op">==</span> <span class="st">&quot;alice@org1.com&quot;</span></span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>        <span class="cf">assert</span> session_data[<span class="st">&quot;org_id&quot;</span>] <span class="op">==</span> <span class="st">&quot;org1&quot;</span></span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>        <span class="cf">assert</span> session_data[<span class="st">&quot;status&quot;</span>] <span class="op">==</span> <span class="st">&quot;recording&quot;</span></span></code></pre></div>
+<h2 id="phase-2-testing-forge-cli-integration-credentialization">Phase 2
+Testing: Forge CLI Integration + Credentialization</h2>
+<h3 id="unit-testing-1"><strong>Unit Testing</strong></h3>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># File: tests/unit/test_forge_cli_integration.py</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> TestForgeCLIIntegration:</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> test_forge_command_construction(<span class="va">self</span>):</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>        <span class="co">&quot;&quot;&quot;Backend constructs correct Forge CLI command.&quot;&quot;&quot;</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>        session_request <span class="op">=</span> {</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;org_id&quot;</span>: <span class="st">&quot;org1&quot;</span>,</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;device_id&quot;</span>: <span class="st">&quot;alice-macbook-abc123&quot;</span>,</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;user_email&quot;</span>: <span class="st">&quot;alice@org1.com&quot;</span>,</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;start_time&quot;</span>: <span class="st">&quot;2024-01-15T09:00:00Z&quot;</span>,</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;end_time&quot;</span>: <span class="st">&quot;2024-01-15T17:00:00Z&quot;</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>        command <span class="op">=</span> construct_forge_command(session_request)</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>        expected <span class="op">=</span> [</span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;forge&quot;</span>, <span class="st">&quot;analyze&quot;</span>,</span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;--org&quot;</span>, <span class="st">&quot;org1&quot;</span>, </span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;--device&quot;</span>, <span class="st">&quot;alice-macbook-abc123&quot;</span>,</span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;--from&quot;</span>, <span class="st">&quot;2024-01-15T09:00:00Z&quot;</span>,</span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;--to&quot;</span>, <span class="st">&quot;2024-01-15T17:00:00Z&quot;</span></span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>        <span class="cf">assert</span> command <span class="op">==</span> expected</span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> test_forge_process_monitoring(<span class="va">self</span>):</span>
+<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a>        <span class="co">&quot;&quot;&quot;Backend can monitor Forge process execution.&quot;&quot;&quot;</span></span>
+<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a>        <span class="cf">with</span> patch(<span class="st">&#39;subprocess.Popen&#39;</span>) <span class="im">as</span> mock_process:</span>
+<span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a>            mock_process.return_value.poll.return_value <span class="op">=</span> <span class="va">None</span>  <span class="co"># Running</span></span>
+<span id="cb11-29"><a href="#cb11-29" aria-hidden="true" tabindex="-1"></a>            mock_process.return_value.returncode <span class="op">=</span> <span class="dv">0</span>  <span class="co"># Success</span></span>
+<span id="cb11-30"><a href="#cb11-30" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb11-31"><a href="#cb11-31" aria-hidden="true" tabindex="-1"></a>            forge_executor <span class="op">=</span> ForgeExecutor()</span>
+<span id="cb11-32"><a href="#cb11-32" aria-hidden="true" tabindex="-1"></a>            status <span class="op">=</span> forge_executor.start_processing(session_request)</span>
+<span id="cb11-33"><a href="#cb11-33" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb11-34"><a href="#cb11-34" aria-hidden="true" tabindex="-1"></a>            <span class="cf">assert</span> status.is_running() <span class="op">==</span> <span class="va">True</span></span>
+<span id="cb11-35"><a href="#cb11-35" aria-hidden="true" tabindex="-1"></a>            mock_process.return_value.poll.return_value <span class="op">=</span> <span class="dv">0</span>  <span class="co"># Finished</span></span>
+<span id="cb11-36"><a href="#cb11-36" aria-hidden="true" tabindex="-1"></a>            <span class="cf">assert</span> status.is_complete() <span class="op">==</span> <span class="va">True</span></span></code></pre></div>
+<h3 id="integration-testing-1"><strong>Integration Testing</strong></h3>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># File: tests/integration/test_user_forge_workflow.py  </span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> TestUserForgeWorkflowIntegration:</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> test_complete_user_to_forge_flow(<span class="va">self</span>):</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>        <span class="co">&quot;&quot;&quot;User request → Backend → Forge CLI → Firestore → User result.&quot;&quot;&quot;</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 1. Simulate user session request</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>        user_jwt <span class="op">=</span> create_test_jwt(<span class="st">&quot;bob@org2.com&quot;</span>, <span class="st">&quot;org2&quot;</span>)</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>        device_id <span class="op">=</span> <span class="st">&quot;bob-laptop-xyz789&quot;</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 2. Backend processes user request</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">with</span> patch(<span class="st">&#39;DeviceIdentity.get_device_id&#39;</span>, return_value<span class="op">=</span>device_id):</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>            response <span class="op">=</span> backend_client.process_session(</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>                session_id<span class="op">=</span><span class="st">&quot;test_session_123&quot;</span>,</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>                start_time<span class="op">=</span><span class="st">&quot;2024-01-15T09:00:00Z&quot;</span>,</span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>                end_time<span class="op">=</span><span class="st">&quot;2024-01-15T17:00:00Z&quot;</span>, </span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>                auth_token<span class="op">=</span>user_jwt</span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>        <span class="cf">assert</span> response.status_code <span class="op">==</span> <span class="dv">202</span>  <span class="co"># Accepted</span></span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>        job_id <span class="op">=</span> response.json()[<span class="st">&quot;job_id&quot;</span>]</span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 3. Wait for processing and verify Firestore upload</span></span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.wait_for_forge_completion(job_id, timeout<span class="op">=</span><span class="dv">30</span>)</span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 4. Verify Firestore contains user-contextualized data</span></span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>        firestore_doc <span class="op">=</span> firestore_client.get_workflow(<span class="st">&quot;test_session_123&quot;</span>)</span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a>        <span class="cf">assert</span> firestore_doc[<span class="st">&quot;org_id&quot;</span>] <span class="op">==</span> <span class="st">&quot;org2&quot;</span></span>
+<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a>        <span class="cf">assert</span> firestore_doc[<span class="st">&quot;device_id&quot;</span>] <span class="op">==</span> device_id</span>
+<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a>        <span class="cf">assert</span> firestore_doc[<span class="st">&quot;analyzed_by_user&quot;</span>] <span class="op">==</span> <span class="st">&quot;bob@org2.com&quot;</span></span>
+<span id="cb12-31"><a href="#cb12-31" aria-hidden="true" tabindex="-1"></a>        <span class="cf">assert</span> firestore_doc[<span class="st">&quot;status&quot;</span>] <span class="op">==</span> <span class="st">&quot;completed&quot;</span></span>
+<span id="cb12-32"><a href="#cb12-32" aria-hidden="true" tabindex="-1"></a>        <span class="cf">assert</span> <span class="st">&quot;workflow_data&quot;</span> <span class="kw">in</span> firestore_doc</span></code></pre></div>
+<h2 id="phase-3-testing-desktop-ui-credentialization">Phase 3 Testing:
+Desktop UI Credentialization</h2>
+<h3 id="unit-testing-2"><strong>Unit Testing</strong></h3>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># File: tests/unit/test_desktop_ui_auth.py</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> TestDesktopUIAuthentication:</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> test_automatic_device_resolution(<span class="va">self</span>):</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>        <span class="co">&quot;&quot;&quot;Desktop UI automatically resolves current device.&quot;&quot;&quot;</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>        ui_controller <span class="op">=</span> SessionController()</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Should automatically detect device without user input</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">assert</span> ui_controller.device_id <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">assert</span> ui_controller.device_id <span class="op">==</span> DeviceIdentity.get_device_id()</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>        <span class="cf">assert</span> <span class="st">&#39;-&#39;</span> <span class="kw">in</span> ui_controller.device_id  <span class="co"># hostname-fingerprint format</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> test_user_session_binding(<span class="va">self</span>):</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>        <span class="co">&quot;&quot;&quot;User login binds to current device context.&quot;&quot;&quot;</span></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>        firebase_user <span class="op">=</span> mock_firebase_login(<span class="st">&quot;charlie@org3.com&quot;</span>)</span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>        ui_controller <span class="op">=</span> SessionController()</span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>        ui_controller.authenticate_user(firebase_user)</span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>        <span class="cf">assert</span> ui_controller.user_email <span class="op">==</span> <span class="st">&quot;charlie@org3.com&quot;</span></span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>        <span class="cf">assert</span> ui_controller.org_id <span class="op">==</span> <span class="st">&quot;org3&quot;</span></span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>        <span class="cf">assert</span> ui_controller.device_id <span class="op">==</span> DeviceIdentity.get_device_id()</span></code></pre></div>
+<h3 id="end-to-end-testing"><strong>End-to-End Testing</strong></h3>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># File: tests/e2e/test_complete_credentialization_flow.py</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> TestCompleteCredentializationFlow:</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> test_user_complete_session_workflow(<span class="va">self</span>):</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>        <span class="co">&quot;&quot;&quot;Complete flow: Login → Record → Process → View Results.&quot;&quot;&quot;</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 1. User Authentication</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>        user_email <span class="op">=</span> <span class="st">&quot;david@org4.com&quot;</span> </span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>        firebase_user <span class="op">=</span> firebase_auth.login(user_email, <span class="st">&quot;test_password&quot;</span>)</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>        desktop_ui <span class="op">=</span> DesktopUI()</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>        desktop_ui.authenticate(firebase_user)</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 2. Session Recording</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>        device_id <span class="op">=</span> desktop_ui.get_current_device_id()</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>        session_id <span class="op">=</span> desktop_ui.start_recording([<span class="st">&quot;mouse&quot;</span>, <span class="st">&quot;window&quot;</span>, <span class="st">&quot;audio&quot;</span>])</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Simulate user activity for 30 seconds</span></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>        time.sleep(<span class="dv">30</span>)</span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>        desktop_ui.stop_recording(session_id)</span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 3. Trigger Processing</span></span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>        processing_job <span class="op">=</span> desktop_ui.process_session(</span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>            session_id<span class="op">=</span>session_id,</span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a>            time_range<span class="op">=</span>(<span class="st">&quot;2024-01-15T09:00:00Z&quot;</span>, <span class="st">&quot;2024-01-15T09:01:00Z&quot;</span>)</span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 4. Wait for completion and retrieve results</span></span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a>        desktop_ui.wait_for_processing_completion(processing_job.job_id)</span>
+<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a>        workflow <span class="op">=</span> desktop_ui.get_session_workflow(session_id)</span>
+<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 5. Verify complete credentialization chain</span></span>
+<span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a>        <span class="cf">assert</span> workflow[<span class="st">&quot;org_id&quot;</span>] <span class="op">==</span> <span class="st">&quot;org4&quot;</span></span>
+<span id="cb14-33"><a href="#cb14-33" aria-hidden="true" tabindex="-1"></a>        <span class="cf">assert</span> workflow[<span class="st">&quot;device_id&quot;</span>] <span class="op">==</span> device_id</span>
+<span id="cb14-34"><a href="#cb14-34" aria-hidden="true" tabindex="-1"></a>        <span class="cf">assert</span> workflow[<span class="st">&quot;analyzed_by_user&quot;</span>] <span class="op">==</span> user_email</span>
+<span id="cb14-35"><a href="#cb14-35" aria-hidden="true" tabindex="-1"></a>        <span class="cf">assert</span> workflow[<span class="st">&quot;requested_from_device&quot;</span>] <span class="op">==</span> device_id  <span class="co"># Same device</span></span>
+<span id="cb14-36"><a href="#cb14-36" aria-hidden="true" tabindex="-1"></a>        <span class="cf">assert</span> <span class="bu">len</span>(workflow[<span class="st">&quot;workflow_data&quot;</span>][<span class="st">&quot;segments&quot;</span>]) <span class="op">&gt;</span> <span class="dv">0</span></span>
+<span id="cb14-37"><a href="#cb14-37" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb14-38"><a href="#cb14-38" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 6. Verify user can only see their own data</span></span>
+<span id="cb14-39"><a href="#cb14-39" aria-hidden="true" tabindex="-1"></a>        other_user_jwt <span class="op">=</span> create_test_jwt(<span class="st">&quot;eve@org5.com&quot;</span>, <span class="st">&quot;org5&quot;</span>) </span>
+<span id="cb14-40"><a href="#cb14-40" aria-hidden="true" tabindex="-1"></a>        <span class="cf">with</span> pytest.raises(<span class="pp">PermissionError</span>):</span>
+<span id="cb14-41"><a href="#cb14-41" aria-hidden="true" tabindex="-1"></a>            desktop_ui.get_session_workflow(session_id, auth_token<span class="op">=</span>other_user_jwt)</span></code></pre></div>
+<h2 id="security-testing-credentialization-validation">Security Testing:
+Credentialization Validation</h2>
+<h3 id="authentication-security"><strong>Authentication
+Security</strong></h3>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># File: tests/security/test_credentialization_security.py</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> TestCredentializationSecurity:</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> test_device_spoofing_prevention(<span class="va">self</span>):</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>        <span class="co">&quot;&quot;&quot;System prevents device ID spoofing attacks.&quot;&quot;&quot;</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>        real_device <span class="op">=</span> DeviceIdentity.get_device_id()</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>        user_jwt <span class="op">=</span> create_test_jwt(<span class="st">&quot;attacker@org1.com&quot;</span>, <span class="st">&quot;org1&quot;</span>)</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Attempt to manipulate device_id in request</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>        malicious_request <span class="op">=</span> {</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;session_id&quot;</span>: <span class="st">&quot;fake_session&quot;</span>,</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;device_id&quot;</span>: <span class="st">&quot;malicious-device-999&quot;</span>,  <span class="co"># Fake device</span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;start_time&quot;</span>: <span class="st">&quot;2024-01-15T09:00:00Z&quot;</span>,</span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;end_time&quot;</span>: <span class="st">&quot;2024-01-15T17:00:00Z&quot;</span></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Backend should ignore provided device_id and use actual device</span></span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>        <span class="cf">with</span> patch(<span class="st">&#39;DeviceIdentity.get_device_id&#39;</span>, return_value<span class="op">=</span>real_device):</span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>            response <span class="op">=</span> backend_client.process_session(</span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>                malicious_request, auth_token<span class="op">=</span>user_jwt</span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Verify backend used real device, not fake one</span></span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>        job_data <span class="op">=</span> get_processing_job_data(response.json()[<span class="st">&quot;job_id&quot;</span>])</span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a>        <span class="cf">assert</span> job_data[<span class="st">&quot;device_id&quot;</span>] <span class="op">==</span> real_device</span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a>        <span class="cf">assert</span> job_data[<span class="st">&quot;device_id&quot;</span>] <span class="op">!=</span> <span class="st">&quot;malicious-device-999&quot;</span></span>
+<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> test_cross_user_data_isolation(<span class="va">self</span>):</span>
+<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a>        <span class="co">&quot;&quot;&quot;Users cannot access other users&#39; session data.&quot;&quot;&quot;</span></span>
+<span id="cb15-29"><a href="#cb15-29" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Create sessions for different users</span></span>
+<span id="cb15-30"><a href="#cb15-30" aria-hidden="true" tabindex="-1"></a>        user1_jwt <span class="op">=</span> create_test_jwt(<span class="st">&quot;alice@org1.com&quot;</span>, <span class="st">&quot;org1&quot;</span>)</span>
+<span id="cb15-31"><a href="#cb15-31" aria-hidden="true" tabindex="-1"></a>        user2_jwt <span class="op">=</span> create_test_jwt(<span class="st">&quot;bob@org1.com&quot;</span>, <span class="st">&quot;org1&quot;</span>)  <span class="co"># Same org</span></span>
+<span id="cb15-32"><a href="#cb15-32" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb15-33"><a href="#cb15-33" aria-hidden="true" tabindex="-1"></a>        device1 <span class="op">=</span> <span class="st">&quot;alice-device-123&quot;</span></span>
+<span id="cb15-34"><a href="#cb15-34" aria-hidden="true" tabindex="-1"></a>        device2 <span class="op">=</span> <span class="st">&quot;bob-device-456&quot;</span></span>
+<span id="cb15-35"><a href="#cb15-35" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb15-36"><a href="#cb15-36" aria-hidden="true" tabindex="-1"></a>        <span class="co"># User1 creates session</span></span>
+<span id="cb15-37"><a href="#cb15-37" aria-hidden="true" tabindex="-1"></a>        <span class="cf">with</span> patch(<span class="st">&#39;DeviceIdentity.get_device_id&#39;</span>, return_value<span class="op">=</span>device1):</span>
+<span id="cb15-38"><a href="#cb15-38" aria-hidden="true" tabindex="-1"></a>            session1_id <span class="op">=</span> create_test_session(user1_jwt)</span>
+<span id="cb15-39"><a href="#cb15-39" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb15-40"><a href="#cb15-40" aria-hidden="true" tabindex="-1"></a>        <span class="co"># User2 tries to access User1&#39;s session</span></span>
+<span id="cb15-41"><a href="#cb15-41" aria-hidden="true" tabindex="-1"></a>        <span class="cf">with</span> patch(<span class="st">&#39;DeviceIdentity.get_device_id&#39;</span>, return_value<span class="op">=</span>device2):</span>
+<span id="cb15-42"><a href="#cb15-42" aria-hidden="true" tabindex="-1"></a>            response <span class="op">=</span> backend_client.get_workflow(</span>
+<span id="cb15-43"><a href="#cb15-43" aria-hidden="true" tabindex="-1"></a>                session_id<span class="op">=</span>session1_id, </span>
+<span id="cb15-44"><a href="#cb15-44" aria-hidden="true" tabindex="-1"></a>                auth_token<span class="op">=</span>user2_jwt</span>
+<span id="cb15-45"><a href="#cb15-45" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb15-46"><a href="#cb15-46" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb15-47"><a href="#cb15-47" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Should fail - different user/device</span></span>
+<span id="cb15-48"><a href="#cb15-48" aria-hidden="true" tabindex="-1"></a>        <span class="cf">assert</span> response.status_code <span class="op">==</span> <span class="dv">403</span></span>
+<span id="cb15-49"><a href="#cb15-49" aria-hidden="true" tabindex="-1"></a>        <span class="cf">assert</span> <span class="st">&quot;access denied&quot;</span> <span class="kw">in</span> response.json()[<span class="st">&quot;detail&quot;</span>].lower()</span></code></pre></div>
+<hr />
+</body>
+</html>
