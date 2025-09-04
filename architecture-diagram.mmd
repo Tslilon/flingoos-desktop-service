@@ -1,0 +1,47 @@
+graph TD
+    subgraph "Multi-Tenant Desktop Service Architecture"
+        
+        UI[Desktop UI] 
+        DS[Desktop Service - on-premise]
+        
+        subgraph "Session Recording - Existing Bridge"
+            BA[Bridge API - on-premise]
+            Bridge[Flingoos Bridge Session Manager]
+            GCP[(GCP Storage - cloud)]
+        end
+        
+        subgraph "Processing Pipeline - Existing Forge"
+            FA[Forge API - cloud run]
+            Forge[Forge Pipeline - cloud run]
+            FS[(Firestore - cloud)]
+        end
+        
+        subgraph "Authentication - Existing"
+            Auth[JWT + Firebase Auth + GCP Signed URLs]
+        end
+    end
+    
+    %% Data Flow with Step Labels
+    UI -->|"A. Start Recording"| DS
+    DS -->|"B. POST /session/start"| BA
+    BA -->|"C. Enable collectors"| Bridge
+    Bridge -->|"D. Collect & upload data"| GCP
+    
+    UI -->|"E. Stop Recording"| DS
+    DS -->|"F.1 POST /session/stop"| BA
+    DS -->|"F.2 POST /process-session"| FA
+    
+    BA -->|"G. Disable collectors"| Bridge
+    FA -->|"H. Trigger processing"| Forge
+    Forge -->|"I. Fetch session data"| GCP
+    Forge -->|"J. Process & store workflow"| FS
+    
+    DS -->|"K. Poll workflow status"| FS
+    FS -->|"L. Status: READY"| DS
+    DS -->|"M. Fetch completed workflow"| FS
+    DS -->|"N. Display results"| UI
+    
+    %% Security connections
+    DS -.->|"JWT Tokens"| Auth
+    BA -.->|"JWT Validation"| Auth
+    FA -.->|"JWT Validation"| Auth

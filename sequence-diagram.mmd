@@ -1,0 +1,24 @@
+sequenceDiagram
+    participant UI as Web UI
+    participant SM as Session Manager Service 
+    participant Bridge as Flingoos Bridge
+    participant GCP as Google Cloud Storage
+    participant Forge as Forge Service
+    participant FS as Firestore
+
+    UI->>SM: 1. Start Session
+    SM->>Bridge: python3 -m bridge.main audio start
+    Note over Bridge: Collects data
+    
+    UI->>SM: 2. Stop Session  
+    SM->>Bridge: python3 -m bridge.main audio stop
+    Bridge->>GCP: Upload data
+    Bridge->>SM: 3. "Upload complete" trigger
+    
+    SM->>Forge: 4. POST /process (trigger JSON)
+    Note over Forge: Process workflow
+    Forge->>FS: Upload workflow
+    Forge->>SM: 5. "Processing complete" + firestore path
+    
+    SM->>FS: 6. Fetch workflow
+    SM->>UI: 7. Display workflow

@@ -1,0 +1,28 @@
+{
+  "version": "1.0",
+  "session": {
+    "org_id": "diligent4",
+    "device_id": "mac.lan-1d36a1a0",
+    "session_id": "97857d65-8943-4a37-bc0e-2cd573ccb1d3",
+    "time_range": {
+      "start": "2025-09-03T20:44:49.897325+00:00",
+      "end": "2025-09-03T20:45:10.038994+00:00"
+    },
+    "timezone": "UTC"
+  },
+  "options": {
+    "stages": [
+      "A",
+      "B",
+      "C",
+      "D",
+      "E",
+      "F"
+    ],
+    "media_processing": true,
+    "llm_enabled": true
+  },
+  "visibility": "private",
+  "pipeline_version": "0.1.0",
+  "config_path": "secrets/config.toml"
+}
