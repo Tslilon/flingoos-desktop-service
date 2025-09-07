@@ -68,3 +68,5 @@ trigger_*.json
 # Compiled files
 *.pyc
 *.pyo
+
+*.pid
